@@ -1,0 +1,156 @@
+*vimNuke.txt*               VimNuke - Send buffer contents to The Foundry Nuke
+
+=======================================================================
+
+Contents                                                        *vimNuke*
+
+        1. Overview             |vimNuke-overview|
+        2. Requirements         |vimNuke-requirements|
+        3. Installation         |vimNuke-installation|
+        4. Configuration        |vimNuke-configuration|
+        5. Usage                |vimNuke-usage|
+        6. Author               |vimNuke-author|
+        7. Changelog            |vimNuke-changelog|
+        8. License              |vimNuke-license|
+
+=======================================================================
+
+1. Overview                                            *vimNuke-overview*
+
+   VimNuke can be used to execute the contents of a Vim buffer (or the
+   current visual selection) in The Foundry Nuke. The plugin will save the
+   commands to be executed in a temporary file and tell Nuke via the
+   command port to source this file. 
+
+=======================================================================
+
+2. Requirements                                    *vimNuke-requirements*
+
+   Python support is required for this plugin to run, check with
+>
+        vim --version
+<
+
+=======================================================================
+
+3. Installation                                    *vimNuke-installation*
+
+   Download the archive and extract the contents in your runtime path,
+   usually ~/.vim/ (see |'runtime-path'| and |add-global-plugin| for
+   details), make sure the directory structure is retained.
+
+   When all files are in place, start Vim and run the |:helptags|
+   command to update the tags index.
+
+   See |vimNuke-configuration| and |vimNuke-usage| for details on how to
+   setup and use this plugin.
+
+   You also need to open a command port in Nuke. Run the following commands
+   in Nuke (Assume commandPort directory is in nuke path) :
+   
+   from commmandPort import server
+   server.start()
+    
+=======================================================================
+
+4. Configuration                                  *vimNuke-configuration*
+
+   This plugin uses the following configuration variables, they can be
+   set in your |.vimrc| file:
+
+   g:vimNukeHost - string (default '127.0.0.1')
+        Specifies the address of the host to connect to.
+
+   g:vimNukePort - number (default 50777)
+        The port number Nuke is listening on for connections. See the
+        short note above on |vimNuke-installation|.
+
+   Example setting in your |.vimrc| file:
+>
+        let vimNukePort=54321
+<
+   The plugin will create the following mappings unless you configure
+   your own mappings:
+
+        nnoremap <leader>sn :py sendBufferToNuke ()<cr>
+        vnoremap <leader>sn :py sendBufferToNuke ()<cr>
+        nnoremap <leader>sN :py sendBufferToNuke (True)<cr>
+        vnoremap <leader>sN :py sendBufferToNuke (True)<cr>
+
+   See |vimNuke-usage| below for details on these function.
+
+=======================================================================
+
+5. Usage                                                  *vimNuke-usage*
+
+   The VimNuke plugin defines the following Python function for public
+   use:
+>
+        sendBufferToNuke (forceBuffer = False)
+<
+   If you call this function with
+>
+        :py sendBufferToNuke ()
+<
+   the code to be executed by Nuke will be saved to a temporary file,
+   and VimNuke will send the appropriate commands to Nuke to source this
+   file.
+
+   In visual mode, only the selected lines will be used unless you use
+   the
+>
+        :py sendBufferToNuke (True)
+<
+   command, in that case the complete current buffer will be used. The
+   complete buffer is also used when not in visual mode. Important: If
+   a selection starts or ends in the middle of a line, this complete
+   line will be executed!
+
+   It is suggested to map these two commands to keyboard shortcuts, the
+   default mappings are shown above. If you set up your own mappings,
+   the default mappings will not be created. See |key-mapping| for
+   details. (Note: If you create one mapping for this function, you
+   need to create the other mappings even if you want them to be the
+   defaults!)
+
+   All temporary files are not deleted automatically. The
+   location of the temporary files depends on your system, see the
+   Python documentation on 'tempfile.mkdtemp' for details.
+
+=======================================================================
+
+6. Author                                                *vimNuke-author*
+
+   This plugin was written by sydh <sydhds _at_ gmail _dot_ com>. See
+   <http://bitbucket.org/sydh/vimNuke> for updates, or check VimNuke's page in the
+   scripts section of the official Vim homepage <http://vim.org/>.
+
+   Original code from vimya plugin by Stefan Goebel <mail@ntworks.net>.
+
+   Feel free to contact the author for any questions regarding this
+   plugin, for bug reports, suggestions etc.
+
+   But don't contact the author for questions about The Foundry Nuke :)
+
+=======================================================================
+
+7. Changelog                                          *vimNuke-changelog*
+
+   2012/10/10   * first public version
+
+=======================================================================
+
+8. License                                              *vimNuke-license*
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your
+option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program. If not, see <http://www.gnu.org/licenses/>.

@@ -1,0 +1,54 @@
+VimNuke
+
+send python code to Nuke from vim
+
+Requirements: 
+
+- Vim with python support
+- The Foundry Nuke (tested with version 6.3v4 - Linux_64bits)
+
+Nuke Setup:
+
+- start commandPort: 
+	from commandPort import server
+	server.start()
+
+- stop commandPort:
+
+	import threading
+	for t in threading.enumerate():
+    	# print t.getName()
+    	if t.getName() == 'commandPort':
+        	t.stop()
+
+Vim Setup:
+
+Manual:
+Copy plugin and doc directories into your '.vim' directory
+
+Pathogen:
+
+Just clone this repository into a subdirectory of your `.vim/bundle` directory like so:
+
+cd ~/.vim/bundle
+git clone https://bitbucket.org/sydh/vimnuke.git
+
+Vundle:
+
+Add the following line to your .vimrc:
+
+Bundle 'https://bitbucket.org/sydh/vimnuke.git'
+
+and run :BundleInstall in vim.
+
+Usage:
+
+The default mappings to toggle the plugin is 
+- '<leader>sn' : send selection or whole buffer if no selection
+- '<leader>sN' : send whole buffer even if something is selected
+
+Help:
+- vim : help vimNuke
+
+Known bugs/limitations:
+- Localhost nuke only 

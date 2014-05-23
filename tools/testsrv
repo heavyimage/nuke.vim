@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# Usage: testsrv [<host> [<port>]]
+#    or: testsrv -s <socket>
+#
+# WARNING: Do not use this script unless you know what you're doing!
+#
+# The following MEL commands will be handled (only if useed exactly as shown!):
+#
+#  cmdFileOutput -o "<file>";    - set the current output file
+#  sysFile -delete "<file>";     - delete the file
+#  cmdFileOutput -ca;            - stop logging to the output file
+
+file=''
+host=${1:-127.0.0.1}
+port=${2:-12345}
+
+if [[ "$host" == "-s" ]] ; then
+   echo "Listening on $port..."
+   ncmd="ncat_UNIX"
+else
+   echo "Listening on $host:$port..."
+   ncmd="ncat_INET"
+fi
+
+ncat_INET() {
+   ncat -k -l "$host" "$port"
+}
+
+ncat_UNIX() {
+   ncat -k -l -U "$port"
+}
+
+$ncmd | while read command ; do
+
+   echo "$command"
+
+   case $command in
+      "cmdFileOutput -o "*)
+         file=$( sed 's/cmdFileOutput -o "\(.*\)";/\1/' <<<"$command" )
+         echo "# DEBUG: logging to file $file" >&2
+         ;;
+      "cmdFileOutput -ca;")
+         echo "# DEBUG: stop logging to file $file" >&2
+         file=''
+         ;;
+      "sysFile -delete "*)
+         temp=$( sed 's/sysFile -delete "\(.*\)";/\1/' <<<"$command" )
+         echo "# DEBUG: deleting file $temp" >&2
+         rm -f "$temp"
+         if [[ "$temp" == "$file" ]] ; then
+            echo "# DEBUG: stop logging to deleted file $file" >&2
+            file=''
+         fi
+         ;;
+   esac
+
+   if [[ -n "$file" ]] ; then
+      echo "$command" >>"$file"
+   fi
+
+done

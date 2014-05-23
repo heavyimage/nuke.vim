@@ -1,28 +1,33 @@
-*vimya.txt*               Vimya - Send buffer contents to Autodesk Maya
+*vimya.txt*           Vimya 0.5 - Send buffer contents to Autodesk Maya
 
 =======================================================================
 
-Contents                                                        *vimya*
+0. Contents                                                     *vimya*
 
-        1. Overview                     |vimya-overview|
-        2. Requirements                 |vimya-requirements|
-        3. Installation                 |vimya-installation|
-        4. Configuration                |vimya-configuration|
-        5. Usage                        |vimya-usage|
-        6. Additional Information       |vimya-info|
-        7. Changelog                    |vimya-changelog|
-        8. License                      |vimya-license|
+    1. Overview                                   |vimya-overview|
+    2. Requirements                               |vimya-requirements|
+    3. Installation                               |vimya-installation|
+    4. Preparing Maya                             |vimya-maya|
+    5. Configuration Options                      |vimya-configuration|
+    6. Functions                                  |vimya-functions|
+    7. Key Mappings                               |vimya-mappings|
+    8. Ex Commands                                |vimya-commands|
+    9. Additional Information                     |vimya-info|
+   10. Changelog                                  |vimya-changelog|
+   11. License                                    |vimya-license|
 
 =======================================================================
 
 1. Overview                                            *vimya-overview*
 
-   Vimya can be used to execute the contents of a Vim buffer, the
-   current visual selection, or a single command in Autodesk Maya. The
-   plugin will save the command(s) to be executed in a temporary file
-   and tell Maya via the command port to source this file. Both MEL and
-   Python scripts are supported, Maya's log can optionally be opened in
-   a separate preview window or tab in Vim.
+   Vimya is plugin for the Vim editor that may be used to execute the
+   contents of a Vim buffer, the current |visual-mode| selection, or a
+   single command in Autodesk Maya.
+
+   The plugin will save the command(s) to be executed in a temporary
+   file and tell Maya via the command port to source this file. Both
+   MEL and Python scripts are supported, Maya's log can optionally be
+   opened in a separate preview window or tab in Vim.
 
 =======================================================================
 
@@ -30,12 +35,16 @@ Contents                                                        *vimya*
 
    Python support is required for this plugin to run, check with
 >
-        vim --version
+     vim --version
+<
+   or from within Vim with
+>
+     :echo has ('python')
 <
    Additionally, you may install the 'Tail Bundle' plugin, download it
    from
 >
-        http://www.vim.org/scripts/script.php?script_id=1714
+     http://www.vim.org/scripts/script.php?script_id=1714
 <
    and install it before using Vimya to view the output of Maya (i.e.
    the stuff printed in the script editor) in Vim. You do not need to
@@ -45,186 +54,476 @@ Contents                                                        *vimya*
 
 3. Installation                                    *vimya-installation*
 
-   When using the vimball (recommended, but requires the 'Vimball'
-   plugin), all you need to do is open the file and source it:
+   Using the Vimball archive is recommended. It requires the 'Vimball'
+   plugin, get it at:
 >
-        vim vimya-0.4.vba
-        :so %
+     http://www.vim.org/scripts/script.php?script_id=1502
 <
-   When using the archive: Extract the contents and copy the files in
-   the 'doc' and 'plugin' subfolders to the appropriate folders in your
-   runtime path. Usually this is '~/.vim/' (see |'runtime-path'| and
-   |add-global-plugin| for details). You may need to create the folders
-   'doc' and 'plugin' if they do not exist.
+   All you need to do is open the file in Vim:
+>
+     $ vim vimya-0.5.vba
+<
+   and source it:
+>
+     :so %
+<
+   When using the Zip archive: Extract the contents and copy the files
+   in the 'doc' and 'plugin' subfolders to the appropriate folders in
+   your runtime path. Usually this is '~/.vim/' (see |'runtimepath'|
+   and |add-global-plugin| for details). You may need to create the
+   folders 'doc' and 'plugin' if they do not exist.
+
+   You may also install Vimya directly from the Git repository if you
+   use 'Pathogen', which you can get here:
+>
+     http://www.vim.org/scripts/script.php?script_id=2332
+<
+   With 'Pathogen' installed, you just need to clone the Vimya Git
+   repository to the bundle directory in your runtime path:
+>
+     git clone https://bitbucket.org/goeb/vimya.git ~/.vim/bundle/vimya
+<
+   This also allows you to update Vimya by pulling the latest version
+   with Git.
 
    When all files are in place, start Vim and run the |:helptags|
-   command to update the tags index.
+   command to update the tags index (this is not necessary if you use
+   the Vimball method).
 
-   See |vimya-configuration| and |vimya-usage| for details on how to
-   setup and use this plugin.
-
-   You also need to open a command port in Maya. To open port 12345
-   you may copy the following command to your userSetup.mel file:
->
-        if (! `commandPort -q ":12345"`) commandPort -n ":12345";
-<
-   Refer to the Maya documentation for more details.
-
-   Note that only INET sockets are supported at the moment, this may be
-   A SECURITY RISK!
+   See |vimya-configuration|, |vimya-functions|, |vimya-mappings| and
+   |vimya-commands| for details on how to setup and use this plugin.
 
 =======================================================================
 
-4. Configuration                                  *vimya-configuration*
+4. Preparing Maya                                          *vimya-maya*
+
+   You need to open a command port in Maya that will be used by Vimya
+   to send the required commands. To open port 12345 (Vimya's default
+   port) you may copy the following command to your userSetup.mel file:
+>
+     if (! `commandPort -q ":12345"`) commandPort -nr -n ":12345";
+<
+   Refer to the Maya documentation for more details. Note that Vimya
+   does not read anything from the socket, usage of the -noreturn (-nr)
+   option is recommended (it should work without it, though).
+
+   On systems that support Unix domain sockets, these may be used for
+   communication:
+>
+     if (! `commandPort -q "socket"`) commandPort -nr -n "socket";
+<
+   Again, please see the Maya documentation for details.
+
+   Do not set the -sourceType (-stp) option to 'python', even if you
+   want to send Python commands! Vimya will send the appropriate MEL
+   commands to run Python code if required.
+
+   Note that there is no authentication, opening a command port may be
+   A SECURITY RISK! This is especially true when INET sockets are used
+   instead of Unix domain sockets.
+
+=======================================================================
+
+5. Configuration Options                          *vimya-configuration*
 
    This plugin uses the following configuration variables, they can be
    set in your |.vimrc| file:
 
-   g:vimyaHost - string (default '127.0.0.1')
-        Specifies the address of the host to connect to.
+   *g:vimyaHost*                                            *vimyaHost*
 
-   g:vimyaPort - number (default 12345)
-        The port number Maya is listening on for connections. See the
-        short note above on |vimya-installation| and the Maya manual
-        for details.
+     Default: '127.0.0.1'
 
-   g:vimyaDefaultFiletype - string (default 'python')
-        Vimya needs to know if the code that should be executed by Maya
-        is MEL or Python code. Usually this is determined by the
-        current filetype. If the filetype is not set, e.g. when a new
-        file is created, this default value is used. It must be set to
-        either 'mel' or 'python'.
+     String that specifies the address of the host to connect to when
+     using an INET socket for communication.
 
-   g:vimyaShowLog - number (default 1)
-        If you have the 'Tail Bundle' plugin installed and you do not
-        want the Maya script editor log to be opened, set this variable
-        to 0.
+   *g:vimyaPort*                                            *vimyaPort*
 
-   g:vimyaTailCommand - string (default 'TabTail')
-        The Tail Bundle command used to open the log (if enabled, see
-        above). The default is 'TabTail' to open the log in a new tab.
-        Set it to 'Tail' if a non-tabbed preview window should be used. 
+     Default: 12345
 
-   g:vimyaTempDir - string (default '')
-        You may set this to a directory name to change the location of
-        the temporary files. If it is an empty string (the default),
-        the system's default temporary path will be used, as determined
-        by Python's 'tempfile' library. See there for details.
+     The port number Maya is listening on for connections when using an
+     INET socket. See |vimya-maya| and the Maya manual for details.
+
+   *g:vimyaSocket*                                        *vimyaSocket*
+
+     Default: ''
+
+     Path to the Unix domain socket to connect to. If this is set to an
+     empty string (the default) an INET connection will be used (as
+     sepcified by |g:vimyaHost| and |g:vimyaPort|). If this is set to a
+     non-empty string, the host and port settings will be ignored and a
+     connection to the specified Unix domain socket will be used. If
+     set, it must be the full (absolute) path name of the socket.
+
+   *g:vimyaTimeout*                                      *vimyaTimeout*
+
+     Default: 5.0
+
+     The timeout that will be used for the connection. If this is a
+     float value, it will be used as is, if it is set to an empty
+     string, timeout will be set to None. See the documentation of
+     Python's socket library for details on socket.settimeout().
+
+   *g:vimyaDefaultFiletype*                      *vimyaDefaultFiletype*
+
+     Default: 'python'
+
+     Vimya needs to know if the code that should be executed by Maya
+     is MEL or Python code. Usually this is determined by the current
+     buffer's |'filetype'|. If the file type is not set, e.g. when a
+     new file is created, this default value is used instead. It must
+     be set to either 'mel' or 'python'.
+
+   *g:vimyaTempDir*                                      *vimyaTempDir*
+
+     Default: ''
+
+     You may set this to a directory name to change the location of
+     the temporary files. If it is an empty string (the default), the
+     system's default temporary path will be used, as determined by
+     Python's tempfile library. See there for more details.
+
+   *g:vimyaShowLog*                                      *vimyaShowLog*
+
+     Default: 1
+
+     If you have the 'Tail Bundle' plugin installed and you do not want
+     the Maya script editor log to be opened, set this option to 0.
+
+   *g:vimyaTailCommand*                              *vimyaTailCommand*
+
+     Default: 'TabTail'
+
+     The 'Tail Bundle' command used to open the log (if enabled, see
+     above). The default is 'TabTail' to open the log in a new tab.
+     Set it to 'Tail' (or 'STail') if a non-tabbed preview window
+     should be used instead. Values other than 'TabTail', 'Tail' and
+     'STail' are invalid.
+
+   *g:vimyaSplitBelow*                                *vimyaSplitBelow*
+
+     Default: &splitbelow
+
+     If 'Tail' or 'STail' are used as |g:vimyaTailCommand|, this option
+     may be used to override the global |'splitbelow'| setting. The
+     default is the same as the global value. After opening the log
+     file the original setting will be restored.
+
+   *g:vimyaForceRefresh*                            *vimyaForceRefresh*
+
+     Default: 0
+
+     Setting this option to 1 will cause |vimyaRefreshLog()| to be
+     called at the end of the |vimyaRun()| (or |sendBufferToMaya()|)
+     function after all required commands have been sent to Maya. See
+     also |g:vimyaRefreshWait| below.
+
+   *g:vimyaRefreshWait*                              *vimyaRefreshWait*
+
+     Default: 2.0
+
+     If |g:vimyaForceRefresh| is enabled, wait this many seconds before
+     calling |vimyaRefreshLog()| after the commands have been sent.
 
    Example setting in your |.vimrc| file:
 >
-        let vimyaPort=54321
+     let g:vimyaPort=54321
 <
-   The plugin will create the following mappings unless you configure
-   your own mappings:
-
-        nnoremap <leader>sm :py sendBufferToMaya ()<cr>
-        vnoremap <leader>sm :py sendBufferToMaya ()<cr>
-        nnoremap <leader>sb :py sendBufferToMaya (True)<cr>
-        vnoremap <leader>sb :py sendBufferToMaya (True)<cr>
-
-   See |vimya-usage| below for details on these function.
+   Note that every option is (re)evaluated whenever it is required, so
+   changing an option during a session is supported.
 
 =======================================================================
 
-5. Usage                                                  *vimya-usage*
+6. Functions                                          *vimya-functions*
 
-   The Vimya plugin defines the following Python function for public
+   The Vimya plugin defines the following Python functions for public
    use:
+
+     |vimyaRun()|                                     |vimyaRun|
+     |vimyaSend()|                                    |vimyaSend|
+     |vimyaOpenLog()|                                 |vimyaOpenLog|
+     |vimyaRefreshLog()|                              |vimyaRefreshLog|
+     |vimyaResetLog()|                                |vimyaResetLog|
+
+   *sendBufferToMaya* (...)                        *sendBufferToMaya()*
+
+     Since Vimya version 0.5, the function sendBufferToMaya() is an
+     alias for the |vimyaRun()| function (see below), for backwards
+     compatibility. Its parameters and behaviour are exactly the same
+     as for |vimyaRun()|.
+
+   *vimyaRun* (forceBuffer = False, userCmd = None)        *vimyaRun()*
+
+     If you call this function without any parameters:
 >
-        sendBufferToMaya (forceBuffer = False, userCmd = None)
+       :py vimyaRun ()
 <
-   If you call this function with
+     the complete current buffer will be executed by Maya. The content
+     will be saved to a temporary file, and Vimya will send commands to
+     Maya's command port to source this file.
+
+     The current buffer's |'filetype'| must be set to either 'python'
+     or 'mel', or not set at all ('none'). If it is not set, the option
+     |g:vimyaDefaultFiletype| is used to determine the correct commands
+     to send. Other file types will cause an error message, no further
+     action will be performed in that case.
+
+     In visual mode, only the selected lines will be executed, unless
+     you set the forceBuffer parameter to True (it defaults to False):
 >
-        :py sendBufferToMaya ()
+       :py vimyaRun (forceBuffer = True)
 <
-   the code to be executed by Maya will be saved to a temporary file,
-   and Vimya will send the appropriate commands to Maya to source this
-   file.
+     In that case the complete buffer will be executed.
 
-   The current filetype - |ft| - must be set to either 'mel' or
-   'python', or not set at all ('none'). If it is not set, the variable
-   'g:vimyaDefaultFileType' is used to determine the correct commands
-   to send to Maya. Other filetypes will cause an error message and no
-   further actions to be performed.
+     Note: If a selection starts or ends in the middle of a line, the
+     complete line will be included!
 
-   In visual mode, only the selected lines will be used unless you use
-   the
+     If you explicitely specify a command with the userCmd parameter:
 >
-        :py sendBufferToMaya (True)
+       :py vimyaRun (userCmd = "<some command>")
 <
-   command, in that case the complete current buffer will be used. The
-   complete buffer is also used when not in visual mode. Important: If
-   a selection starts or ends in the middle of a line, this complete
-   line will be executed!
+     the buffer content (and visual selection) is ignored, and only
+     this command is executed instead. Obviously, the forceBuffer
+     parameter is also ignored in this case. Note that the comamnd will
+     still be written to a temporary file first, and then this file
+     will be sourced. The current |'filetype'| also determines the type
+     of the command, as described above.
 
-   If you explicitely specify a command, i.e.
+     If the 'Tail Bundle' plugin is installed, the output of Maya will
+     be written to a temporary log file and this file will be opened in
+     a new preview tab (or window, see the |g:vimyaTailCommand| option)
+     in Vim, unless this behaviour is disabled by setting the variable
+     |g:vimyaShowLog| to 0. See |:TabTail| or |:Tail| if installed. See
+     |vimyaResetLog()| and |vimyaOpenLog()| for more details. Also, if
+     enabled, after sending the commands to Maya the log buffer will be
+     refreshed automatically, see the options |g:vimyaForceRefresh| and
+     |g:vimyaRefreshWait| and the |vimyaRefreshLog()| function for more
+     details.
+
+     All temporary files will be deleted automatically. The files
+     sourced by Maya will be deleted by Maya itself: after the command
+     to source the file the
 >
-        :py sendBufferToMaya (userCmd = "<some command>")
+       sysFile -delete <temporary file>
 <
-   the buffer content (and visual selection) is ignored, and this
-   command is used instead. Obviously, the forceBuffer parameter is
-   also ignored in this case. Note that the comamnd will still be
-   written to the temporary file first, and then this file will be
-   sourced.
+     MEL command is sent. The temporary logfiles will be deleted when
+     Vim is closed, do not delete any of them manually before you close
+     Vim. The location of the temporary files depends on your system,
+     unless the option |g:vimyaTempDir| is set to override the default.
+     See the Python documentation on tempfile.mkstemp() for details.
 
-   It is suggested to map the commands you need to keyboard shortcuts,
-   the default mappings are shown above. If you set up your own
-   mappings, no default mappings will be created. See |key-mapping| for
-   details. (Note: If you create one mapping for this function, you
-   need to create the other mappings even if you want them to be the
-   defaults, else they will not be available!)
+     Note: Since version 0.2 the plugin keeps track of all temporary
+     files and tries to delete them when leaving Vim, since deleting
+     with Maya's own commands did not always work reliably.
 
-   If the 'Tail Bundle' plugin is installed, the output of Maya will be
-   written to a temporary log file and this file will be opened in a
-   new preview tab (or window, see the 'g:vimyaTailCommand' option) in
-   Vim, unless this behaviour is disabled by setting the variable
-   'g:vimyaShowLog' to 0. See |:TabTail| or |:Tail| if installed.
+     The function |vimyaSend()| is used to send all required commands,
+     please see there for details on the connection settings.
 
-   All temporary files are deleted automatically. The files sourced by
-   Maya will be deleted by Maya itself: after the command to source the
-   file the
+   *vimyaSend* (commands)                                 *vimyaSend()*
+
+     This function will open a connection to Maya's command port and
+     send the specified commands. The commands parameter must be a list
+     of one or more strings. A newline will be appended to all commands
+     before they are sent. Commands will be sent in the order they
+     appear in the list.
+
+     The options |g:vimyaHost|, |g:vimyaPort|, |g:vimyaSocket| and
+     |g:vimyaTimeout| specify the parameters of the connection. Please
+     see their respective documentation for details.
+
+     An error message will be displayed if something goes wrong. After
+     an error, no attempt will be made to send any more commands from
+     the list.
+
+     Note: This function sends all specified commands as they are
+     (with the exception of the added newline). The |'filetype'| is
+     ignored, no temporary files are created, and this function will
+     not open any log file.
+
+   *vimyaOpenLog* ()                                   *vimyaOpenLog()*
+
+     This function will open the currently used log file, using the
+     configured 'Tail Bundle' command, unless this is disabled.
+
+     The options |g:vimyaShowLog|, |g:vimyaTailCommand| and
+     |g:vimyaSplitBelow| may be used to change the behaviour.
+
+     If no log file is set, or the file is already opened in a window,
+     this function does nothing. If |g:vimyaTailCommand| is not set to
+     'TabTail', any preview window currently opened in the active tab
+     will be closed.
+
+   *vimyaRefreshLog* ()                             *vimyaRefreshLog()*
+
+     This function will update the log file if it is currently opened
+     in a preview window. If the window of the log file is not located
+     in the current tab, it will switch to the window's tab.
+
+     If the log file's window is a regular window, no attempt to
+     refresh it will be made (the tab will be switched if required,
+     though). Does nothing if no log file is currently set. If a log
+     file is set, but not opened in any window, an error message will
+     be printed.
+
+   *vimyaResetLog* ()                                 *vimyaResetLog()*
+
+     This function will create a new temporary file and instruct Maya
+     to use it as its log file.
+
+     If a log file is already set, the command to close all (!) log
+     files:
 >
-        sysFile -delete [temporary file]
+       cmdFileOutput -ca
 <
-   MEL command is sent. The temporary logfile will be deleted when Vim
-   is closed, do not delete it manually before you close Vim. The
-   location of the temporary files depends on your system, unless the
-   option 'g:vimyaTempDir' is set to override the default. See the
-   Python documentation on 'tempfile.mkstemp' for details.
+     will be sent to Maya first, then the new file is set.
 
-   Note: Since version 0.2 the plugin keeps track of all temporary
-   files and tries to delete them when leaving Vim, since deleting
-   with Maya's own commands did not always work. Additionally, when
-   leaving Vim the command
+     The log file will be opened in Vim if enabled, see
+     |vimyaOpenLog()| for details.
+
+     If |g:vimyaShowLog| is not enabled (or the 'Tail Bundle' plugin is
+     not available), no new log file will be created (if a log file is
+     set, it will still be closed, though).
+
+   Note that help for all these functions can also be accessed the
+   Python way by running:
 >
-        cmdFileOutput -closeAll
+     :py help (<function>)
 <
-   is sent to Maya, which will close all open log files, before the
-   plugin tries to delete the log file.
-
-   The timeout for the communication with Maya is set to 5 seconds,
-   which should be enough for connections to the localhost or to
-   machines in the LAN, and there is currently no option to change
-   this. If you need a higher value, modify the plugin's source code.
-   You may file a bug report in this case, maybe I will add an option.
+   It is suggested that you map the functions you need to keyboard
+   shortcuts, the default |vimya-mappings| are described below. There
+   are also some Ex commands available to call some of the functions,
+   see |vimya-commands|.
 
 =======================================================================
 
-6. Additional Information                                  *vimya-info*
+7. Key Mappings                                        *vimya-mappings*
+
+   The Vimya plugin will create the following mappings unless you
+   configure your own mappings:
+>
+     nnoremap <leader>sm :py vimyaRun ()<cr>
+     vnoremap <leader>sm :py vimyaRun ()<cr>
+     nnoremap <leader>sb :py vimyaRun (forceBuffer = True)<cr>
+     vnoremap <leader>sb :py vimyaRun (forceBuffer = True)<cr>
+<
+   See |vimya-functions| above for details on these function. The
+   mappings are available in normal and visual mode.
+
+   Note that if you create any custom mapping that contains either the
+>
+     :py vimyaRun
+<
+   or the
+>
+     :py sendBufferToMaya
+<
+   command the default mappings shown above will not be created!
+
+   See |key-mapping| for details on creating custom key mappings.
+
+=======================================================================
+
+8. Ex Commands                                         *vimya-commands*
+
+   The following commands are defined by Vimya:
+
+     :VimyaRun                                          |:VimyaRun|
+     :VimyaBuffer                                       |:VimyaBuffer|
+     :VimyaCommand                                      |:VimyaCommand|
+     :VimyaSend                                         |:VimyaSend|
+
+   *:VimyaRun*
+
+     Calls the |vimyaRun()| function without any parameters. The
+     command itself does not expect any parameters.
+
+   *:VimyaBuffer*
+
+     Calls the |vimyaRun()| function with the forceBuffer parameter set
+     to True. The command itself does not expect any parameters.
+
+   *:VimyaCommand* <parameters>
+
+     Calls the |vimyaRun()| function with the userCmd parameter set to
+     the parameters of the command.
+
+     Parameters must not be quoted as a whole, Vim will do that.
+     However, individual parameters of the command to be sent must be
+     quoted as required by MEL or Python! All parameters will be
+     concatenated to one single string.
+
+     For example (assuming Python is used for commands):
+>
+       :VimyaCommand print "a" + "b"
+<
+     will result in the function call
+>
+       vimyaRun (userCmd = "print \"a\" + \"b\"")
+<
+     and this will eventually print the string "ab" in Maya's script
+     output. Also see |vimyaRun()| for more details.
+
+   *:VimyaSend* <parameters>
+
+     Works like |:VimyaCommand|, but instead of using |vimyaRun()| the
+     command will be sent using the |vimyaSend()| function.
+
+     Please see the notes on parameter quoting and the example for
+     |:VimyaCommand|. These notes also apply to :VimyaSend.
+
+     The string built from the command's parameters will be the one
+     (and only) element of |vimyaSend|'s commands parameter.
+
+     For example (again, assuming Python is used for commands):
+>
+       :VimyaSend print "a" + "b"
+<
+     will result in the function call
+>
+       vimyaSend (["print \"a\" + \"b\""])
+<
+   Commands for the other available functions are not defined, but you
+   can easily do this in you |.vimrc| file if required.
+
+=======================================================================
+
+9. Additional Information                                  *vimya-info*
 
    See Vimya's page in the scripts section of the official Vim homepage
-   for more information, including links to bug tracker etc.:
+   for more information, including links to the bug tracker etc.:
 >
-        http://www.vim.org/scripts/script.php?script_id=2626
+     http://www.vim.org/scripts/script.php?script_id=2626
 <
-   Feel free to contact the author for any questions regarding this
-   plugin, for bug reports, suggestions etc.
+   The Git repository is hosted at Bitbucket:
+>
+     https://bitbucket.org/goeb/vimya/
+<
+   Feel free to contact the author for any questions, suggestions etc.
+   regarding this plugin by mail:
+>
+     vimya /at/ subtype /dot/ de
+<
 
 =======================================================================
 
-7. Changelog                                          *vimya-changelog*
+10. Changelog                                         *vimya-changelog*
 
+   2014/05/22   * rewrite of most of the plugin's code and most of the
+                  documentation
+                * added options g:vimyaSocket, g:vimyaTimeout,
+                  g:vimyaForceRefresh, g:vimyaRefreshWait and
+                  g:vimyaSplitBelow
+                * added support for Unix domain sockets
+                * renamed sendBufferToMaya() to vimyaRun() (the former
+                  is still available for backwards compatibility)
+                * added public functions vimyaSend(), vimyaOpenLog(),
+                  vimyaRefreshLog() and vimyaResetLog()
+                * added docstrings to all Python functions
+                * added Ex commands :VimyaRun, :VimyaBuffer, :VimyaSend
+                  and :VimyaCommand
+                * fixed some issues that could probably cause the log
+                  features not to work properly for certain file names
+                * changed version number to 0.5
+                * thanks to Talha Ahmed for suggestions and testing
    2014/02/11   * added the vimyaTempDir and vimyaTailCommand options,
                   thanks to Claude Ronin
                 * minor updates to the documentation
@@ -239,7 +538,7 @@ Contents                                                        *vimya*
 
 =======================================================================
 
-8. License                                              *vimya-license*
+11. License                                             *vimya-license*
 
 Copyright 2009, 2013-2014 Stefan Goebel.
 

@@ -1,5 +1,5 @@
 PLUGIN  = vimya
-VERSION = 0.4
+VERSION = 0.5
 
 SOURCE  = plugin/${PLUGIN}.vim
 SOURCE += doc/${PLUGIN}.txt
@@ -14,8 +14,10 @@ ${PLUGIN}-${VERSION}.vba: ${SOURCE}
 	mv ${PLUGIN}.vba ${PLUGIN}-${VERSION}.vba
 
 ${PLUGIN}-${VERSION}.zip: ${SOURCE} ${EXTRA}
-	7z a -tzip ${PLUGIN}-${VERSION}.zip ../${PLUGIN} -mx=9 \
-		-xr'!*.vba' -xr'!*.zip' -xr'!Makefile' -xr'!.*'
+	mkdir ${PLUGIN}-${VERSION}
+	cp --parents ${SOURCE} ${EXTRA} ${PLUGIN}-${VERSION}
+	7z a -tzip ${PLUGIN}-${VERSION}.zip ${PLUGIN}-${VERSION} -mx=9
+	rm -rf ${PLUGIN}-${VERSION}
 
 clean:
 	rm ${PLUGIN}-${VERSION}.vba

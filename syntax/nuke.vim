@@ -29,7 +29,7 @@ syn region nukeLayerGuts matchgroup=nukeLayerOuters start="^add_layer {" end="}$
 
 " Stack /group commands
 syn match nukeStackSet "^set [a-zA-Z0-9]\+ \[stack \d\+\]$"
-syn match nukeStackPush "^push \$\?[a-zA-Z0-9]\+$"
+syn match nukeStackPush "^push \$\?[a-zA-Z0-9_]\+$"
 syn match nukeGroupEnd "^end_group$"
 
 " Do most things dynamically but at least make name a keyword for easy browsing

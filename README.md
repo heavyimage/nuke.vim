@@ -1,7 +1,7 @@
 # nuke.vim
 An integration package for the Foundry's [Nuke] (https://www.thefoundry.co.uk/products/nuke/).  This is my first vim "plugin" so go easy on me!
 
-![Screenshot of nuke.vim]([https://github.com/eavyimage/nuke.vim/blob/master/docs/screenshot.png "Screenshot of nuke.vim")
+![Screenshot of nuke.vim](https://github.com/heavyimage/nuke.vim/blob/master/docs/screenshot.png "Screenshot of nuke.vim")
 
 # What works now
 * Just syntax hilighting and a simple ftdetect plugin for .nk/.gizmo files!

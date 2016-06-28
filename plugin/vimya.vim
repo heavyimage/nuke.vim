@@ -60,7 +60,7 @@ call VimyaSetConfig ( 'Timeout',          5.0         )
 " Mappings:
 """
 
-if ! hasmapto (':py sendBufferToMaya') && ! hasmapto (':py vimyaRun')
+if ! hasmapto (':py sendBufferToNuke') && ! hasmapto (':py vimyaRun')
     nnoremap <leader>sm :py vimyaRun ()<cr>
     vnoremap <leader>sm :py vimyaRun ()<cr>
     nnoremap <leader>sb :py vimyaRun (forceBuffer = True)<cr>
@@ -98,7 +98,7 @@ import vim
 
 # Global variables:
 #
-#   __vimyaLogPath   - If not empty, path of the log file currently used by Maya.
+#   __vimyaLogPath   - If not empty, path of the log file currently used by Nuke.
 #   __vimyaTempFiles - Contains all the temporary files created (log files, MEL/Python files).
 
 __vimyaLogPath   = ''
@@ -133,12 +133,12 @@ def __vimyaRemoveTempFiles ():
 
 def __vimyaStopLogging ():
 
-    """Tell Maya to stop logging and close all open log files.
+    """Tell Nuke to stop logging and close all open log files.
 
     __vimyaStopLogging () : bool
 
     If a log file is currently set, this function will send the `cmdFileOutput -closeAll` command
-    to Maya, causing all (!) open log files to be closed. The __vimyaLogPath variable will be set
+    to Nuke, causing all (!) open log files to be closed. The __vimyaLogPath variable will be set
     to an empty string if the log file could be closed successfully, its original value will be
     added to the __vimyaTempFiles list for clean up on exit.
 
@@ -224,11 +224,11 @@ def __vimyaFixPath (filename):
 
 def __vimyaFindLog ():
 
-    """Find the buffer and tab that contains the Maya log.
+    """Find the buffer and tab that contains the Nuke log.
 
     __vimyaFindLog () : (int, int)
 
-    If a Maya log file is currently set, this function will return the number of the tab page and
+    If a Nuke log file is currently set, this function will return the number of the tab page and
     the buffer number in which this log file is opened. Note: Searching will stop on first match!
     There is no convenient way to check if a window is a preview window without switching tabs, so
     this is not checked, the buffer found may be a regular window!
@@ -338,12 +338,12 @@ def vimyaOpenLog ():
 
 def vimyaResetLog ():
 
-    """(Re)set Maya's log file.
+    """(Re)set Nuke's log file.
 
     vimyaResetLog () : bool
 
-    This function will create a temporary file and instruct Maya to use it as its log file. If a
-    log file is already set, the command to close all (!) log files will be sent to Maya first,
+    This function will create a temporary file and instruct Nuke to use it as its log file. If a
+    log file is already set, the command to close all (!) log files will be sent to Nuke first,
     then the new file is set. The log file will be opened in Vim if enabled, see vimyaOpenLog()
     for details. If g:vimyaShowLog is not enabled (or the Tail Bundle plugin is not available), no
     new log file will be created (if a log file should be set, it will still be closed, though).
@@ -381,18 +381,18 @@ def vimyaResetLog ():
 
 def vimyaSend (commands):
 
-    """Send commands to Maya's command port.
+    """Send commands to Nuke's command port.
 
     vimyaSend (commands) : int
 
-    This function will open a connection to Maya's command port (as configured), and send the
-    commands - which must be a list of one or more strings - to Maya. A newline will be appended
+    This function will open a connection to Nuke's command port (as configured), and send the
+    commands - which must be a list of one or more strings - to Nuke. A newline will be appended
     to every command automatically. Commands will be sent in the order they appear in the list.
 
     Socket exceptions will be caught and an appropriate error message will be displayed. After an
     exception, no attempt will be made to send any more commands from the list.
 
-    Returns the number of commands successfully sent to Maya.
+    Returns the number of commands successfully sent to Nuke.
     """
 
     socketPath =      vim.eval ('g:vimyaSocket' )
@@ -439,29 +439,29 @@ def vimyaSend (commands):
 
 def vimyaRun (forceBuffer = False, userCmd = None):
 
-    """Sent (partial) buffer contents or a single command to Maya's command port.
+    """Sent (partial) buffer contents or a single command to Nuke's command port.
 
     vimyaRun (forcedBuffer = False, userCmd = None) : bool
 
-    If userCmd is not specified, saves the current buffer to a temporary file and instructs Maya to
+    If userCmd is not specified, saves the current buffer to a temporary file and instructs Nuke to
     source this file. In visual mode only the selected lines are used (for partially selected lines
     the complete line will be included). In visual mode, forceBuffer may be set to True to force
     execution of the complete buffer.
 
-    If userCmd is specified, this command will be written to the file executed by Maya, and the
+    If userCmd is specified, this command will be written to the file executed by Nuke, and the
     buffer content will be ignored.
 
-    In both cases, the current buffer's file type determines how the file is executed by Maya,
+    In both cases, the current buffer's file type determines how the file is executed by Nuke,
     either as MEL or Python script. The file type must be either 'mel' or 'python', or not set at
     all, in which case the 'g:vimyaDefaultFiletype' will be used.
 
-    If Maya's log is not yet set, it will be set and opened (if configured), depending on the
+    If Nuke's log is not yet set, it will be set and opened (if configured), depending on the
     'g:vimyaShowLog' setting. See vimyaResetLog() for details. If 'g:vimyaForceRefresh' is set,
     vimyaRefreshLog() will be called after waiting for 'g:vimyaRefreshWait' seconds after all
-    commands have been sent to Maya. Note that if a log file has been set and you close the log
+    commands have been sent to Nuke. Note that if a log file has been set and you close the log
     window, it will not be opened automatically, you may use vimyaOpenLog() to open it again.
 
-    For backwards compatibility, this function is also available as sendBufferToMaya(). The usage
+    For backwards compatibility, this function is also available as sendBufferToNuke(). The usage
     is exactly the same as for vimyaRun().
 
     Returns False if an error occured, else True.
@@ -526,10 +526,7 @@ def vimyaRun (forceBuffer = False, userCmd = None):
 
     return True
 
-# For backwards comapatibility, sendBufferToMaya() will be an alias for vimyaRun():
+# For backwards comapatibility, sendBufferToNuke() will be an alias for vimyaRun():
 
-sendBufferToMaya = vimyaRun
+sendBufferToNuke = vimyaRun
 
-EOP
-
-" vim: set et si nofoldenable ft=python sts=4 sw=4 tw=99 ts=4 fenc=utf8 :

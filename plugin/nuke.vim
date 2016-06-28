@@ -113,13 +113,20 @@ def __nukevimRemoveTempFiles():
             except:
                 pass
 
+def __nukevimMsg(message):
 
+    """Print (and logs, via :messages) a vim message.
 
+    __nukevimMsg(message) : True
 
+    This function will print the message in Vim's message area
 
+    It will always return True.
     """
 
+    vim.command('echomsg "%s"' % __nukevimEscape(message, '\\"'))
 
+    return True
 
 def __nukevimError(message):
 

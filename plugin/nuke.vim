@@ -73,7 +73,6 @@ endif
 
 command -nargs=0 NukevimRun     :py nukevimRun()
 command -nargs=0 NukevimBuffer  :py nukevimRun(forceBuffer = True    )
-command -nargs=1 NukevimCommand :py nukevimRun(userCmd     = <q-args>)
 command -nargs=1 NukevimSend    :py nukevimSend([<q-args>]            )
 
 """
@@ -436,19 +435,15 @@ def nukevimSend(commands):
 
     return sent
 
-def nukevimRun(forceBuffer = False, userCmd = None):
+def nukevimRun(forceBuffer = False):
 
     """Sent (partial) buffer contents or a single command to Nuke's command port.
 
-    nukevimRun(forcedBuffer = False, userCmd = None) : bool
+    nukevimRun(forcedBuffer = False) : bool
 
-    If userCmd is not specified, saves the current buffer to a temporary file and instructs Nuke to
-    source this file. In visual mode only the selected lines are used (for partially selected lines
-    the complete line will be included). In visual mode, forceBuffer may be set to True to force
-    execution of the complete buffer.
-
-    If userCmd is specified, this command will be written to the file executed by Nuke, and the
-    buffer content will be ignored.
+    Saves the current buffer to a temporary file and instructs Nuke to source this file. In visual
+    mode only the selected lines are used (for partially selected lines the complete line will be
+    included). In visual mode, forceBuffer may be set to True to force execution of the complete buffer.
 
     If Nuke's log is not yet set, it will be set and opened (if configured), depending on the
     'g:nukevimShowLog' setting. See nukevimResetLog() for details. If 'g:nukevimForceRefresh' is set,
@@ -479,17 +474,14 @@ def nukevimRun(forceBuffer = False, userCmd = None):
     __nukevimTempFiles.append(tmpPath)
 
     try:
-        if userCmd:
-            os.write(tmpHandle, '%s\n' % userCmd)
+        vStart = vim.current.buffer.mark('<')
+        if(vStart is None) or (forceBuffer):
+            for line in vim.current.buffer:
+                os.write(tmpHandle, '%s\n' % line)
         else:
-            vStart = vim.current.buffer.mark('<')
-            if(vStart is None) or (forceBuffer):
-                for line in vim.current.buffer:
-                    os.write(tmpHandle, '%s\n' % line)
-            else:
-                vEnd = vim.current.buffer.mark('>')
-                for line in vim.current.buffer [vStart [0] - 1 : vEnd [0]]:
-                    os.write(tmpHandle, '%s\n' % line)
+            vEnd = vim.current.buffer.mark('>')
+            for line in vim.current.buffer [vStart [0] - 1 : vEnd [0]]:
+                os.write(tmpHandle, '%s\n' % line)
     finally:
         os.close(tmpHandle)
 

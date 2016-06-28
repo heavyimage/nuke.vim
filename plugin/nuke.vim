@@ -45,14 +45,10 @@ function NukevimSetConfig(name, default)
 endfunction
 
 call NukevimSetConfig( 'DefaultFiletype',  'python'      )
-call NukevimSetConfig( 'ForceRefresh',     0             )
 call NukevimSetConfig( 'Host',             'nomad.local' )
 call NukevimSetConfig( 'Port',             50777         )
-call NukevimSetConfig( 'RefreshWait',      2.0           )
-call NukevimSetConfig( 'ShowLog',          1             )
 call NukevimSetConfig( 'Socket',           ''            )
 call NukevimSetConfig( 'SplitBelow',       &splitbelow   )
-call NukevimSetConfig( 'TailCommand',      'TabTail'     )
 call NukevimSetConfig( 'TempDir',          ''            )
 call NukevimSetConfig( 'Timeout',          5.0           )
 
@@ -79,11 +75,6 @@ command -nargs=1 NukevimSend    :py nukevimSend([<q-args>]            )
 " Main stuff (most of it is Python):
 """
 
-let g:nukevimTailAvailable = 0
-if exists('g:Tail_Loaded')
-    let g:nukevimTailAvailable = 1
-endif
-
 autocmd VimLeavePre * py __nukevimRemoveTempFiles()
 
 python << EOP
@@ -97,9 +88,7 @@ import vim
 
 # Global variables:
 
-# If not empty, path of the log file currently used by Nuke.
-__nukevimLogPath   = ''
-# Contains all the temporary files created (log files, Python files).
+# Contains all the temporary python files created
 __nukevimTempFiles = []
 
 def __nukevimRemoveTempFiles():
@@ -112,15 +101,10 @@ def __nukevimRemoveTempFiles():
     temporary files created during the session. There is no error handling, if deleting a file
     fails, the file will be left on disk.
 
-    If a log file is set this function will try to close it first, see __nukevimStopLogging().
-
     This function does not return anything.
     """
 
-    global __nukevimLogPath, __nukevimTempFiles
-
-    if __nukevimLogPath != '':
-        __nukevimStopLogging()
+    global __nukevimTempFiles
 
     for tempFile in __nukevimTempFiles:
         if os.path.isfile(tempFile):
@@ -129,33 +113,13 @@ def __nukevimRemoveTempFiles():
             except:
                 pass
 
-def __nukevimStopLogging():
 
-    """Tell Nuke to stop logging and close all open log files.
 
-    __nukevimStopLogging() : bool
 
-    If a log file is currently set, this function will send the `cmdFileOutput -closeAll` command
-    to Nuke, causing all(!) open log files to be closed. The __nukevimLogPath variable will be set
-    to an empty string if the log file could be closed successfully, its original value will be
-    added to the __nukevimTempFiles list for clean up on exit.
 
-    If the connection fails, an error message will be shown and the return value will be False,
-    else this function returns True. If no log file has been set, this function does nothing and
-    returns True.
     """
 
-    global __nukevimLogPath, __nukevimTempFiles
 
-    if __nukevimLogPath == '':
-        return True
-
-    if nukevimSend(['cmdFileOutput -ca;']) == 1:
-        __nukevimTempFiles.append(__nukevimLogPath)
-        __nukevimLogPath = ''
-        return True
-    else:
-        return __nukevimError('Could not close the log file.')
 
 def __nukevimError(message):
 
@@ -219,163 +183,6 @@ def __nukevimFixPath(filename):
         return filename.replace('\\', '/')
     else:
         return filename
-
-def __nukevimFindLog():
-
-    """Find the buffer and tab that contains the Nuke log.
-
-    __nukevimFindLog() : (int, int)
-
-    If a Nuke log file is currently set, this function will return the number of the tab page and
-    the buffer number in which this log file is opened. Note: Searching will stop on first match!
-    There is no convenient way to check if a window is a preview window without switching tabs, so
-    this is not checked, the buffer found may be a regular window!
-
-    Returns a tuple: (tabNumber, bufferNumber). If the log file is not set or not opened in any
-    buffer, this function returns the tuple (0, 0). If there is a buffer for the log file, but it
-    is not opened in any window (and thus in no tab), the return value will be (0, bufferNumber).
-    """
-
-    global __nukevimLogPath
-
-    if __nukevimLogPath != '':
-        bufferIndex  = int(vim.eval('bufnr     ("%s")' % __nukevimEscape(__nukevimLogPath, '\\"')))
-        bufferExists = int(vim.eval('bufexists ( %d )' % int(bufferIndex)))
-        if bufferExists:
-            tabNum = int(vim.eval('tabpagenr("$")'))
-            for tabIndex in range(1, tabNum + 1):
-                tabBuffers = vim.eval('tabpagebuflist(%d)' % tabIndex)
-                if str(bufferIndex) in tabBuffers:
-                    return (tabIndex, bufferIndex)
-        return (0, bufferIndex)
-
-    return (0, 0)
-
-def nukevimRefreshLog():
-
-    """Update the log file in the preview window.
-
-    nukevimRefreshLog() : bool
-
-    This function will update the log file if it is currently opened in a preview window. If the
-    window of the log file is not located in the current tab, it will switch to the window's tab.
-    If the log file's window is a regular window, no attempt to refresh it will be made (the tab
-    will be switched, though). Does nothing if no log file is currently set.
-
-    If no log file is set, returns True. Same if a log file is set and opened in a preview window
-    (or a regular window). If a log file is set, but not opened in any window, returns False (and
-    prints an error message).
-    """
-
-    global __nukevimLogPath
-
-    if __nukevimLogPath != '':
-
-        (tabIndex, bufferIndex) = __nukevimFindLog()
-
-        if not tabIndex:
-            return __nukevimError('No log file window found.')
-        else:
-            vim.command('tabnext %d' % tabIndex)
-            winIndex = int(vim.eval('bufwinnr(%d)' % bufferIndex))
-            if winIndex > 0 and int(vim.eval('getwinvar(%d, "&previewwindow")' % winIndex)):
-                vim.command('call tail#Refresh()')
-
-    return True
-
-def nukevimOpenLog():
-
-    """Open the log file using the Tail Bundle plugin.
-
-    nukevimOpenLog() : bool
-
-    This function will open the currently used log file using the configured Tail Bundle command,
-    unless this is disabled. The options g:nukevimShowLog, g:nukevimTailCommand and g:nukevimSplitBelow
-    may be used to change the behaviour. If no log file is set, or the file is already opened in a
-    window, this function does nothing. If g:nukevimTailCommand is not 'TabTail', any preview window
-    currently opened will be closed.
-
-    Returns False in case of an error, True in all other cases.
-    """
-
-    global __nukevimLogPath
-
-    (tabIndex, bufferIndex) = __nukevimFindLog ()
-
-    if __nukevimLogPath != '' and tabIndex == 0:
-
-        splitBelowGlobal  = int(vim.eval('&splitbelow'       ))
-        splitBelowNukevim = int(vim.eval('g:nukevimSplitBelow' ))
-        tailCommand       =      vim.eval('g:nukevimTailCommand')
-
-        if tailCommand not in('Tail', 'STail', 'TabTail'):
-            return __nukevimError('Invalid value for g:nukevimTailCommand.')
-
-        success = False
-
-        try:
-            if tailCommand != 'TabTail':
-                vim.command('pclose')
-            if splitBelowNukevim:
-                vim.command('set splitbelow')
-            else:
-                vim.command('set nosplitbelow')
-            vim.command('%s %s' % (tailCommand, __nukevimFilenameEscape(__nukevimLogPath)))
-            if tailCommand != 'TabTail':
-                vim.command('wincmd p')
-            success = True
-        finally:
-            if splitBelowGlobal:
-                vim.command('set splitbelow')
-            else:
-                vim.command('set nosplitbelow')
-
-        return success
-
-    return True
-
-def nukevimResetLog():
-
-    """(Re)set Nuke's log file.
-
-    nukevimResetLog() : bool
-
-    This function will create a temporary file and instruct Nuke to use it as its log file. If a
-    log file is already set, the command to close all (!) log files will be sent to Nuke first,
-    then the new file is set. The log file will be opened in Vim if enabled, see nukevimOpenLog()
-    for details. If g:nukevimShowLog is not enabled (or the Tail Bundle plugin is not available), no
-    new log file will be created (if a log file should be set, it will still be closed, though).
-
-    Returns True on success, False in case of failure.
-    """
-
-    global __nukevimLogPath
-
-    if __nukevimLogPath != '':
-        if not __nukevimStopLogging():
-            return False
-
-    tailAvailable = int(vim.eval('g:nukevimTailAvailable'))
-    showLog       = int(vim.eval('g:nukevimShowLog'      ))
-
-    if tailAvailable and showLog:
-
-        tempDir = vim.eval('g:nukevimTempDir')
-        if tempDir != '':
-            tempfile.tempdir = tempDir
-        else:
-            tempfile.tempdir = None
-
-        (logHandle, logPath) = tempfile.mkstemp(suffix = '.log', prefix = 'nukevim.', text = 1)
-        __nukevimLogPath = vim.eval('expand("%s")' % __nukevimEscape(logPath, '\\"'))
-
-        escapedLogPath = __nukevimEscape(__nukevimFixPath(__nukevimLogPath), '\\"')
-        if nukevimSend(['cmdFileOutput -o "%s";' % escapedLogPath]) != 1:
-            return False
-
-        return nukevimOpenLog()
-
-    return True
 
 def nukevimSend(commands):
 
@@ -445,24 +252,14 @@ def nukevimRun(forceBuffer = False):
     mode only the selected lines are used (for partially selected lines the complete line will be
     included). In visual mode, forceBuffer may be set to True to force execution of the complete buffer.
 
-    If Nuke's log is not yet set, it will be set and opened (if configured), depending on the
-    'g:nukevimShowLog' setting. See nukevimResetLog() for details. If 'g:nukevimForceRefresh' is set,
-    nukevimRefreshLog() will be called after waiting for 'g:nukevimRefreshWait' seconds after all
-    commands have been sent to Nuke. Note that if a log file has been set and you close the log
-    window, it will not be opened automatically, you may use nukevimOpenLog() to open it again.
-
     Returns False if an error occured, else True.
     """
 
-    global __nukevimLogPath, __nukevimTempFiles
+    global __nukevimTempFiles
 
     filetype = vim.eval('&g:filetype')
     if filetype not in ['', 'python']:
         return __nukevimError('Error: Supported filetypes: "python", None.')
-
-    if __nukevimLogPath == '':
-        if not nukevimResetLog():
-            return False
 
     tempDir = vim.eval('g:nukevimTempDir')
     if tempDir != '':
@@ -497,11 +294,5 @@ def nukevimRun(forceBuffer = False):
     sent = nukevimSend(commands)
     if sent != len(commands):
         return __nukevimError('%d commands out of %d sent successfully.' %(sent, len(commands)))
-
-    refresh = int  (vim.eval('g:nukevimForceRefresh'))
-    wait    = float(vim.eval('g:nukevimRefreshWait' ))
-    if __nukevimLogPath != '' and refresh:
-        time.sleep(wait)
-        return nukevimRefreshLog()
 
     return True

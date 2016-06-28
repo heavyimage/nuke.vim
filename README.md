@@ -9,8 +9,11 @@ An integration package for the Foundry's [Nuke] (https://www.thefoundry.co.uk/pr
 # Coming soon
 * A terminal based node viewer
 * An ability to send python code from vim to nuke ala vim-slime
-    * Base on similar project here: https://bitbucket.org/sydh/vimnuke/src
-    * Use Nvizible's [NukeExternalControl](https://github.com/Nvizible/NukeExternalControl)
+    * Refork vimya (like https://bitbucket.org/sydh/vimnuke/src, only newer)
+    * see nuke scriptlog/errorlog in vim!?
+    * option to send to graphical or non-graphical nuke
+    * shortcuts to reload stuff?
+    * Use Nvizible's [NukeExternalControl](https://github.com/Nvizible/NukeExternalControl)?
     * similar to: https://atom.io/packages/foundry-nuke or https://github.com/davidpaulrosser/atom-maya
     * more info: http://community.thefoundry.co.uk/discussion/topic.aspx?f=190&t=102660
 * Other cool ideas you send to me

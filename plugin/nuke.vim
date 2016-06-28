@@ -60,11 +60,11 @@ call NukevimSetConfig( 'Timeout',          5.0           )
 " Mappings:
 """
 
-if ! hasmapto (':py sendBufferToNuke') && ! hasmapto (':py nukevimRun')
-    nnoremap <leader>sm :py nukevimRun ()<cr>
-    vnoremap <leader>sm :py nukevimRun ()<cr>
-    nnoremap <leader>sb :py nukevimRun (forceBuffer = True)<cr>
-    vnoremap <leader>sb :py nukevimRun (forceBuffer = True)<cr>
+if ! hasmapto (':py nukevimRun')
+    nnoremap <leader>sn :py nukevimRun()<cr>
+    vnoremap <leader>sn :py nukevimRun()<cr>
+    nnoremap <leader>sb :py nukevimRun(forceBuffer = True)<cr>
+    vnoremap <leader>sb :py nukevimRun(forceBuffer = True)<cr>
 endif
 
 """
@@ -461,9 +461,6 @@ def nukevimRun(forceBuffer = False, userCmd = None):
     commands have been sent to Nuke. Note that if a log file has been set and you close the log
     window, it will not be opened automatically, you may use nukevimOpenLog() to open it again.
 
-    For backwards compatibility, this function is also available as sendBufferToNuke(). The usage
-    is exactly the same as for nukevimRun().
-
     Returns False if an error occured, else True.
     """
 
@@ -523,8 +520,3 @@ def nukevimRun(forceBuffer = False, userCmd = None):
         return nukevimRefreshLog()
 
     return True
-
-# For backwards comapatibility, sendBufferToNuke() will be an alias for nukevimRun():
-
-sendBufferToNuke = nukevimRun
-

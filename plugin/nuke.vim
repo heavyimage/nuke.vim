@@ -450,10 +450,6 @@ def nukevimRun(forceBuffer = False, userCmd = None):
     If userCmd is specified, this command will be written to the file executed by Nuke, and the
     buffer content will be ignored.
 
-    In both cases, the current buffer's file type determines how the file is executed by Nuke,
-    as Python script. The file type must be 'python', or not set at all, in which case the
-    'g:nukevimDefaultFiletype' will be used.
-
     If Nuke's log is not yet set, it will be set and opened (if configured), depending on the
     'g:nukevimShowLog' setting. See nukevimResetLog() for details. If 'g:nukevimForceRefresh' is set,
     nukevimRefreshLog() will be called after waiting for 'g:nukevimRefreshWait' seconds after all
@@ -499,11 +495,9 @@ def nukevimRun(forceBuffer = False, userCmd = None):
 
     commands = ['commandEcho -state on -lineNumbers on;']
 
-    defaultType = vim.eval('g:nukevimDefaultFiletype')
     escapedPath = __nukevimEscape(__nukevimFixPath(tmpPath), '\\"')
 
-    if filetype == 'python' or (filetype == '' and defaultType == 'python'):
-        commands.append('python("execfile(\\"%s\\")");' % escapedPath)
+    commands.append('python("execfile(\\"%s\\")");' % escapedPath)
 
     commands.append('commandEcho -state off -lineNumbers off;')
     commands.append('sysFile -delete "%s";' % escapedPath)

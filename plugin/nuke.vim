@@ -29,7 +29,7 @@
 "
 """
 
-if exists ('g:nukevimLoaded') || &compatible || ! has ('python')
+if exists('g:nukevimLoaded') || &compatible || ! has('python')
     finish
 endif
 let g:nukevimLoaded = '0.5'
@@ -38,23 +38,23 @@ let g:nukevimLoaded = '0.5'
 " Configuration variables:
 """
 
-function NukevimSetConfig (name, default)
-    if ! exists ('g:nukevim' . a:name)
+function NukevimSetConfig(name, default)
+    if ! exists('g:nukevim' . a:name)
         let {'g:nukevim' . a:name} = a:default
     endif
 endfunction
 
-call NukevimSetConfig ( 'DefaultFiletype',  'python'    )
-call NukevimSetConfig ( 'ForceRefresh',     0           )
-call NukevimSetConfig ( 'Host',             '127.0.0.1' )
-call NukevimSetConfig ( 'Port',             12345       )
-call NukevimSetConfig ( 'RefreshWait',      2.0         )
-call NukevimSetConfig ( 'ShowLog',          1           )
-call NukevimSetConfig ( 'Socket',           ''          )
-call NukevimSetConfig ( 'SplitBelow',       &splitbelow )
-call NukevimSetConfig ( 'TailCommand',      'TabTail'   )
-call NukevimSetConfig ( 'TempDir',          ''          )
-call NukevimSetConfig ( 'Timeout',          5.0         )
+call NukevimSetConfig( 'DefaultFiletype',  'python'      )
+call NukevimSetConfig( 'ForceRefresh',     0             )
+call NukevimSetConfig( 'Host',             'nomad.local' )
+call NukevimSetConfig( 'Port',             50777         )
+call NukevimSetConfig( 'RefreshWait',      2.0           )
+call NukevimSetConfig( 'ShowLog',          1             )
+call NukevimSetConfig( 'Socket',           ''            )
+call NukevimSetConfig( 'SplitBelow',       &splitbelow   )
+call NukevimSetConfig( 'TailCommand',      'TabTail'     )
+call NukevimSetConfig( 'TempDir',          ''            )
+call NukevimSetConfig( 'Timeout',          5.0           )
 
 """
 " Mappings:
@@ -71,21 +71,21 @@ endif
 " Commands:
 """
 
-command -nargs=0 NukevimRun     :py nukevimRun  ()
-command -nargs=0 NukevimBuffer  :py nukevimRun  (forceBuffer = True    )
-command -nargs=1 NukevimCommand :py nukevimRun  (userCmd     = <q-args>)
-command -nargs=1 NukevimSend    :py nukevimSend ([<q-args>]            )
+command -nargs=0 NukevimRun     :py nukevimRun()
+command -nargs=0 NukevimBuffer  :py nukevimRun(forceBuffer = True    )
+command -nargs=1 NukevimCommand :py nukevimRun(userCmd     = <q-args>)
+command -nargs=1 NukevimSend    :py nukevimSend([<q-args>]            )
 
 """
 " Main stuff (most of it is Python):
 """
 
 let g:nukevimTailAvailable = 0
-if exists ('g:Tail_Loaded')
+if exists('g:Tail_Loaded')
     let g:nukevimTailAvailable = 1
 endif
 
-autocmd VimLeavePre * py __nukevimRemoveTempFiles ()
+autocmd VimLeavePre * py __nukevimRemoveTempFiles()
 
 python << EOP
 
@@ -104,11 +104,11 @@ import vim
 __nukevimLogPath   = ''
 __nukevimTempFiles = []
 
-def __nukevimRemoveTempFiles ():
+def __nukevimRemoveTempFiles():
 
     """Remove all temporary files.
 
-    __nukevimRemoveTempFiles () : None
+    __nukevimRemoveTempFiles() : None
 
     This function will be called automatically when leaving Vim. It will try to delete all the
     temporary files created during the session. There is no error handling, if deleting a file
@@ -122,23 +122,23 @@ def __nukevimRemoveTempFiles ():
     global __nukevimLogPath, __nukevimTempFiles
 
     if __nukevimLogPath != '':
-        __nukevimStopLogging ()
+        __nukevimStopLogging()
 
     for tempFile in __nukevimTempFiles:
-        if os.path.isfile (tempFile):
+        if os.path.isfile(tempFile):
             try:
-                os.unlink (tempFile)
+                os.unlink(tempFile)
             except:
                 pass
 
-def __nukevimStopLogging ():
+def __nukevimStopLogging():
 
     """Tell Nuke to stop logging and close all open log files.
 
-    __nukevimStopLogging () : bool
+    __nukevimStopLogging() : bool
 
     If a log file is currently set, this function will send the `cmdFileOutput -closeAll` command
-    to Nuke, causing all (!) open log files to be closed. The __nukevimLogPath variable will be set
+    to Nuke, causing all(!) open log files to be closed. The __nukevimLogPath variable will be set
     to an empty string if the log file could be closed successfully, its original value will be
     added to the __nukevimTempFiles list for clean up on exit.
 
@@ -152,18 +152,18 @@ def __nukevimStopLogging ():
     if __nukevimLogPath == '':
         return True
 
-    if nukevimSend (['cmdFileOutput -ca;']) == 1:
-        __nukevimTempFiles.append (__nukevimLogPath)
+    if nukevimSend(['cmdFileOutput -ca;']) == 1:
+        __nukevimTempFiles.append(__nukevimLogPath)
         __nukevimLogPath = ''
         return True
     else:
-        return __nukevimError ('Could not close the log file.')
+        return __nukevimError('Could not close the log file.')
 
-def __nukevimError (message):
+def __nukevimError(message):
 
     """Print an error message.
 
-    __nukevimError (message) : False
+    __nukevimError(message) : False
 
     This function will print the error message in Vim's message area, using the appropriate
     error highlighting.
@@ -171,15 +171,15 @@ def __nukevimError (message):
     It will always return False.
     """
 
-    vim.command ('echohl ErrorMsg | echo "%s" | echohl None' % __nukevimEscape (message, '\\"'))
+    vim.command('echohl ErrorMsg | echo "%s" | echohl None' % __nukevimEscape(message, '\\"'))
 
     return False
 
-def __nukevimEscape (string, characters):
+def __nukevimEscape(string, characters):
 
     """Escape specified characters in a string with backslash.
 
-    __nukevimEscape (string, characters) : str
+    __nukevimEscape(string, characters) : str
 
     Works like Vim's escape() function. Every occurrence of one of the characters in the characters
     parameter inside the string will be replaced by '\' + character. The backslash itself has to be
@@ -189,44 +189,44 @@ def __nukevimEscape (string, characters):
     """
 
     for character in characters:
-        string = string.replace (character, '\\%s' % character)
+        string = string.replace(character, '\\%s' % character)
 
     return string
 
-def __nukevimFilenameEscape (filename):
+def __nukevimFilenameEscape(filename):
 
     """Apply Vim's fnameescape() function to a string.
 
-    __nukevimFilenameEscape (string) : str
+    __nukevimFilenameEscape(string) : str
 
     This function may be used to apply Vim's fnameescape() function to the supplied parameter.
 
     Returns the escaped string.
     """
 
-    return vim.eval ('fnameescape ("%s")' % __nukevimEscape (filename, '\\"'))
+    return vim.eval('fnameescape("%s")' % __nukevimEscape(filename, '\\"'))
 
-def __nukevimFixPath (filename):
+def __nukevimFixPath(filename):
 
     """Replace all backslashes in the file name with slashes on Windows platforms.
 
-    __nukevimFixPath (filename) : str
+    __nukevimFixPath(filename) : str
 
     Replaces all backslashes in the file name with slashes on Windows platforms.
 
     Returns the resulting string.
     """
 
-    if platform.system () == 'Windows':
-        return filename.replace ('\\', '/')
+    if platform.system() == 'Windows':
+        return filename.replace('\\', '/')
     else:
         return filename
 
-def __nukevimFindLog ():
+def __nukevimFindLog():
 
     """Find the buffer and tab that contains the Nuke log.
 
-    __nukevimFindLog () : (int, int)
+    __nukevimFindLog() : (int, int)
 
     If a Nuke log file is currently set, this function will return the number of the tab page and
     the buffer number in which this log file is opened. Note: Searching will stop on first match!
@@ -241,23 +241,23 @@ def __nukevimFindLog ():
     global __nukevimLogPath
 
     if __nukevimLogPath != '':
-        bufferIndex  = int (vim.eval ('bufnr     ("%s")' % __nukevimEscape (__nukevimLogPath, '\\"')))
-        bufferExists = int (vim.eval ('bufexists ( %d )' % int           (bufferIndex          )))
+        bufferIndex  = int(vim.eval('bufnr     ("%s")' % __nukevimEscape(__nukevimLogPath, '\\"')))
+        bufferExists = int(vim.eval('bufexists ( %d )' % int(bufferIndex)))
         if bufferExists:
-            tabNum = int (vim.eval ('tabpagenr ("$")'))
-            for tabIndex in range (1, tabNum + 1):
-                tabBuffers = vim.eval ('tabpagebuflist (%d)' % tabIndex)
-                if str (bufferIndex) in tabBuffers:
+            tabNum = int(vim.eval('tabpagenr("$")'))
+            for tabIndex in range(1, tabNum + 1):
+                tabBuffers = vim.eval('tabpagebuflist(%d)' % tabIndex)
+                if str(bufferIndex) in tabBuffers:
                     return (tabIndex, bufferIndex)
         return (0, bufferIndex)
 
     return (0, 0)
 
-def nukevimRefreshLog ():
+def nukevimRefreshLog():
 
     """Update the log file in the preview window.
 
-    nukevimRefreshLog () : bool
+    nukevimRefreshLog() : bool
 
     This function will update the log file if it is currently opened in a preview window. If the
     window of the log file is not located in the current tab, it will switch to the window's tab.
@@ -273,23 +273,23 @@ def nukevimRefreshLog ():
 
     if __nukevimLogPath != '':
 
-        (tabIndex, bufferIndex) = __nukevimFindLog ()
+        (tabIndex, bufferIndex) = __nukevimFindLog()
 
         if not tabIndex:
-            return __nukevimError ('No log file window found.')
+            return __nukevimError('No log file window found.')
         else:
-            vim.command ('tabnext %d' % tabIndex)
-            winIndex = int (vim.eval ('bufwinnr (%d)' % bufferIndex))
-            if winIndex > 0 and int (vim.eval ('getwinvar (%d, "&previewwindow")' % winIndex)):
-                vim.command ('call tail#Refresh ()')
+            vim.command('tabnext %d' % tabIndex)
+            winIndex = int(vim.eval('bufwinnr(%d)' % bufferIndex))
+            if winIndex > 0 and int(vim.eval('getwinvar(%d, "&previewwindow")' % winIndex)):
+                vim.command('call tail#Refresh()')
 
     return True
 
-def nukevimOpenLog ():
+def nukevimOpenLog():
 
     """Open the log file using the Tail Bundle plugin.
 
-    nukevimOpenLog () : bool
+    nukevimOpenLog() : bool
 
     This function will open the currently used log file using the configured Tail Bundle command,
     unless this is disabled. The options g:nukevimShowLog, g:nukevimTailCommand and g:nukevimSplitBelow
@@ -306,41 +306,41 @@ def nukevimOpenLog ():
 
     if __nukevimLogPath != '' and tabIndex == 0:
 
-        splitBelowGlobal  = int (vim.eval ('&splitbelow'       ))
-        splitBelowNukevim = int (vim.eval ('g:nukevimSplitBelow' ))
-        tailCommand       =      vim.eval ('g:nukevimTailCommand')
+        splitBelowGlobal  = int(vim.eval('&splitbelow'       ))
+        splitBelowNukevim = int(vim.eval('g:nukevimSplitBelow' ))
+        tailCommand       =      vim.eval('g:nukevimTailCommand')
 
-        if tailCommand not in ('Tail', 'STail', 'TabTail'):
-            return __nukevimError ('Invalid value for g:nukevimTailCommand.')
+        if tailCommand not in('Tail', 'STail', 'TabTail'):
+            return __nukevimError('Invalid value for g:nukevimTailCommand.')
 
         success = False
 
         try:
             if tailCommand != 'TabTail':
-                vim.command ('pclose')
+                vim.command('pclose')
             if splitBelowNukevim:
-                vim.command ('set splitbelow')
+                vim.command('set splitbelow')
             else:
-                vim.command ('set nosplitbelow')
-            vim.command ('%s %s' % (tailCommand, __nukevimFilenameEscape (__nukevimLogPath)))
+                vim.command('set nosplitbelow')
+            vim.command('%s %s' % (tailCommand, __nukevimFilenameEscape(__nukevimLogPath)))
             if tailCommand != 'TabTail':
-                vim.command ('wincmd p')
+                vim.command('wincmd p')
             success = True
         finally:
             if splitBelowGlobal:
-                vim.command ('set splitbelow')
+                vim.command('set splitbelow')
             else:
-                vim.command ('set nosplitbelow')
+                vim.command('set nosplitbelow')
 
         return success
 
     return True
 
-def nukevimResetLog ():
+def nukevimResetLog():
 
     """(Re)set Nuke's log file.
 
-    nukevimResetLog () : bool
+    nukevimResetLog() : bool
 
     This function will create a temporary file and instruct Nuke to use it as its log file. If a
     log file is already set, the command to close all (!) log files will be sent to Nuke first,
@@ -354,36 +354,36 @@ def nukevimResetLog ():
     global __nukevimLogPath
 
     if __nukevimLogPath != '':
-        if not __nukevimStopLogging ():
+        if not __nukevimStopLogging():
             return False
 
-    tailAvailable = int (vim.eval ('g:nukevimTailAvailable'))
-    showLog       = int (vim.eval ('g:nukevimShowLog'      ))
+    tailAvailable = int(vim.eval('g:nukevimTailAvailable'))
+    showLog       = int(vim.eval('g:nukevimShowLog'      ))
 
     if tailAvailable and showLog:
 
-        tempDir = vim.eval ('g:nukevimTempDir')
+        tempDir = vim.eval('g:nukevimTempDir')
         if tempDir != '':
             tempfile.tempdir = tempDir
         else:
             tempfile.tempdir = None
 
-        (logHandle, logPath) = tempfile.mkstemp (suffix = '.log', prefix = 'nukevim.', text = 1)
-        __nukevimLogPath = vim.eval ('expand ("%s")' % __nukevimEscape (logPath, '\\"'))
+        (logHandle, logPath) = tempfile.mkstemp(suffix = '.log', prefix = 'nukevim.', text = 1)
+        __nukevimLogPath = vim.eval('expand("%s")' % __nukevimEscape(logPath, '\\"'))
 
-        escapedLogPath = __nukevimEscape (__nukevimFixPath (__nukevimLogPath), '\\"')
-        if nukevimSend (['cmdFileOutput -o "%s";' % escapedLogPath]) != 1:
+        escapedLogPath = __nukevimEscape(__nukevimFixPath(__nukevimLogPath), '\\"')
+        if nukevimSend(['cmdFileOutput -o "%s";' % escapedLogPath]) != 1:
             return False
 
-        return nukevimOpenLog ()
+        return nukevimOpenLog()
 
     return True
 
-def nukevimSend (commands):
+def nukevimSend(commands):
 
     """Send commands to Nuke's command port.
 
-    nukevimSend (commands) : int
+    nukevimSend(commands) : int
 
     This function will open a connection to Nuke's command port (as configured), and send the
     commands - which must be a list of one or more strings - to Nuke. A newline will be appended
@@ -395,31 +395,31 @@ def nukevimSend (commands):
     Returns the number of commands successfully sent to Nuke.
     """
 
-    socketPath =      vim.eval ('g:nukevimSocket' )
-    timeout    =      vim.eval ('g:nukevimTimeout')
-    host       =      vim.eval ('g:nukevimHost'   )
-    port       = int (vim.eval ('g:nukevimPort'   ))
+    socketPath =      vim.eval('g:nukevimSocket' )
+    timeout    =      vim.eval('g:nukevimTimeout')
+    host       =      vim.eval('g:nukevimHost'   )
+    port       =  int(vim.eval('g:nukevimPort'   ))
 
     try:
         if socketPath != '':
-            connection = socket.socket (socket.AF_UNIX, socket.SOCK_STREAM)
+            connection = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         else:
-            connection = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
+            connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if timeout == '':
-            connection.settimeout (None)
+            connection.settimeout(None)
         else:
-            connection.settimeout (float (timeout))
+            connection.settimeout(float(timeout))
     except socket.error as e:
-        __nukevimError ('Could not initialize the socket: %s' % str (e))
+        __nukevimError('Could not initialize the socket: %s' % str(e))
         return 0
 
     try:
         if socketPath != '':
-            connection.connect (socketPath)
+            connection.connect(socketPath)
         else:
-            connection.connect ((host, port))
+            connection.connect((host, port))
     except socket.error as e:
-        __nukevimError ('Could not connect to command port: %s' % str (e))
+        __nukevimError('Could not connect to command port: %s' % str(e))
         return 0
 
     sent = 0
@@ -427,21 +427,21 @@ def nukevimSend (commands):
     try:
         try:
             for command in commands:
-                connection.send ('%s\n' % command)
+                connection.send('%s\n' % command)
                 sent = sent + 1
         except socket.error as e:
-            __nukevimError ('Sending a command failed: %s' % str (e))
+            __nukevimError('Sending a command failed: %s' % str(e))
     finally:
-        connection.shutdown (socket.SHUT_WR)
-        connection.close ()
+        connection.shutdown(socket.SHUT_WR)
+        connection.close()
 
     return sent
 
-def nukevimRun (forceBuffer = False, userCmd = None):
+def nukevimRun(forceBuffer = False, userCmd = None):
 
     """Sent (partial) buffer contents or a single command to Nuke's command port.
 
-    nukevimRun (forcedBuffer = False, userCmd = None) : bool
+    nukevimRun(forcedBuffer = False, userCmd = None) : bool
 
     If userCmd is not specified, saves the current buffer to a temporary file and instructs Nuke to
     source this file. In visual mode only the selected lines are used (for partially selected lines
@@ -469,58 +469,58 @@ def nukevimRun (forceBuffer = False, userCmd = None):
 
     global __nukevimLogPath, __nukevimTempFiles
 
-    filetype = vim.eval ('&g:filetype')
+    filetype = vim.eval('&g:filetype')
     if filetype not in ['', 'python']:
-        return __nukevimError ('Error: Supported filetypes: "python", None.')
+        return __nukevimError('Error: Supported filetypes: "python", None.')
 
     if __nukevimLogPath == '':
-        if not nukevimResetLog ():
+        if not nukevimResetLog():
             return False
 
-    tempDir = vim.eval ('g:nukevimTempDir')
+    tempDir = vim.eval('g:nukevimTempDir')
     if tempDir != '':
         tempfile.tempdir = tempDir
     else:
         tempfile.tempdir = None
 
-    (tmpHandle, tmpPath) = tempfile.mkstemp (suffix = '.tmp', prefix = 'nukevim.', text = 1)
+    (tmpHandle, tmpPath) = tempfile.mkstemp(suffix = '.tmp', prefix = 'nukevim.', text = 1)
     __nukevimTempFiles.append(tmpPath)
 
     try:
         if userCmd:
-            os.write (tmpHandle, '%s\n' % userCmd)
+            os.write(tmpHandle, '%s\n' % userCmd)
         else:
-            vStart = vim.current.buffer.mark ('<')
-            if (vStart is None) or (forceBuffer):
+            vStart = vim.current.buffer.mark('<')
+            if(vStart is None) or (forceBuffer):
                 for line in vim.current.buffer:
-                    os.write (tmpHandle, '%s\n' % line)
+                    os.write(tmpHandle, '%s\n' % line)
             else:
-                vEnd = vim.current.buffer.mark ('>')
+                vEnd = vim.current.buffer.mark('>')
                 for line in vim.current.buffer [vStart [0] - 1 : vEnd [0]]:
-                    os.write (tmpHandle, '%s\n' % line)
+                    os.write(tmpHandle, '%s\n' % line)
     finally:
-        os.close (tmpHandle)
+        os.close(tmpHandle)
 
     commands = ['commandEcho -state on -lineNumbers on;']
 
-    defaultType = vim.eval ('g:nukevimDefaultFiletype')
-    escapedPath = __nukevimEscape (__nukevimFixPath (tmpPath), '\\"')
+    defaultType = vim.eval('g:nukevimDefaultFiletype')
+    escapedPath = __nukevimEscape(__nukevimFixPath(tmpPath), '\\"')
 
     if filetype == 'python' or (filetype == '' and defaultType == 'python'):
-        commands.append ('python ("execfile (\\"%s\\")");' % escapedPath)
+        commands.append('python("execfile(\\"%s\\")");' % escapedPath)
 
-    commands.append ('commandEcho -state off -lineNumbers off;')
-    commands.append ('sysFile -delete "%s";' % escapedPath)
+    commands.append('commandEcho -state off -lineNumbers off;')
+    commands.append('sysFile -delete "%s";' % escapedPath)
 
-    sent = nukevimSend (commands)
-    if sent != len (commands):
-        return __nukevimError ('%d commands out of %d sent successfully.' % (sent, len (commands)))
+    sent = nukevimSend(commands)
+    if sent != len(commands):
+        return __nukevimError('%d commands out of %d sent successfully.' %(sent, len(commands)))
 
-    refresh = int   (vim.eval ('g:nukevimForceRefresh'))
-    wait    = float (vim.eval ('g:nukevimRefreshWait' ))
+    refresh = int  (vim.eval('g:nukevimForceRefresh'))
+    wait    = float(vim.eval('g:nukevimRefreshWait' ))
     if __nukevimLogPath != '' and refresh:
-        time.sleep (wait)
-        return nukevimRefreshLog ()
+        time.sleep(wait)
+        return nukevimRefreshLog()
 
     return True
 

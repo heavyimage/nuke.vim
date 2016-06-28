@@ -19,7 +19,7 @@
 "
 " Vimya 0.5 - Execute buffer contents as MEL or Python scripts in Autodesk Maya.
 "
-" Help is available in doc/vimya.txt or from within Vim:
+" Help is available in doc/nukevim.txt or from within Vim:
 "
 "   :help vimya
 "
@@ -29,63 +29,63 @@
 "
 """
 
-if exists ('g:vimyaLoaded') || &compatible || ! has ('python')
+if exists ('g:nukevimLoaded') || &compatible || ! has ('python')
     finish
 endif
-let g:vimyaLoaded = '0.5'
+let g:nukevimLoaded = '0.5'
 
 """
 " Configuration variables:
 """
 
-function VimyaSetConfig (name, default)
-    if ! exists ('g:vimya' . a:name)
-        let {'g:vimya' . a:name} = a:default
+function NukevimSetConfig (name, default)
+    if ! exists ('g:nukevim' . a:name)
+        let {'g:nukevim' . a:name} = a:default
     endif
 endfunction
 
-call VimyaSetConfig ( 'DefaultFiletype',  'python'    )
-call VimyaSetConfig ( 'ForceRefresh',     0           )
-call VimyaSetConfig ( 'Host',             '127.0.0.1' )
-call VimyaSetConfig ( 'Port',             12345       )
-call VimyaSetConfig ( 'RefreshWait',      2.0         )
-call VimyaSetConfig ( 'ShowLog',          1           )
-call VimyaSetConfig ( 'Socket',           ''          )
-call VimyaSetConfig ( 'SplitBelow',       &splitbelow )
-call VimyaSetConfig ( 'TailCommand',      'TabTail'   )
-call VimyaSetConfig ( 'TempDir',          ''          )
-call VimyaSetConfig ( 'Timeout',          5.0         )
+call NukevimSetConfig ( 'DefaultFiletype',  'python'    )
+call NukevimSetConfig ( 'ForceRefresh',     0           )
+call NukevimSetConfig ( 'Host',             '127.0.0.1' )
+call NukevimSetConfig ( 'Port',             12345       )
+call NukevimSetConfig ( 'RefreshWait',      2.0         )
+call NukevimSetConfig ( 'ShowLog',          1           )
+call NukevimSetConfig ( 'Socket',           ''          )
+call NukevimSetConfig ( 'SplitBelow',       &splitbelow )
+call NukevimSetConfig ( 'TailCommand',      'TabTail'   )
+call NukevimSetConfig ( 'TempDir',          ''          )
+call NukevimSetConfig ( 'Timeout',          5.0         )
 
 """
 " Mappings:
 """
 
-if ! hasmapto (':py sendBufferToNuke') && ! hasmapto (':py vimyaRun')
-    nnoremap <leader>sm :py vimyaRun ()<cr>
-    vnoremap <leader>sm :py vimyaRun ()<cr>
-    nnoremap <leader>sb :py vimyaRun (forceBuffer = True)<cr>
-    vnoremap <leader>sb :py vimyaRun (forceBuffer = True)<cr>
+if ! hasmapto (':py sendBufferToNuke') && ! hasmapto (':py nukevimRun')
+    nnoremap <leader>sm :py nukevimRun ()<cr>
+    vnoremap <leader>sm :py nukevimRun ()<cr>
+    nnoremap <leader>sb :py nukevimRun (forceBuffer = True)<cr>
+    vnoremap <leader>sb :py nukevimRun (forceBuffer = True)<cr>
 endif
 
 """
 " Commands:
 """
 
-command -nargs=0 VimyaRun     :py vimyaRun  ()
-command -nargs=0 VimyaBuffer  :py vimyaRun  (forceBuffer = True    )
-command -nargs=1 VimyaCommand :py vimyaRun  (userCmd     = <q-args>)
-command -nargs=1 VimyaSend    :py vimyaSend ([<q-args>]            )
+command -nargs=0 NukevimRun     :py nukevimRun  ()
+command -nargs=0 NukevimBuffer  :py nukevimRun  (forceBuffer = True    )
+command -nargs=1 NukevimCommand :py nukevimRun  (userCmd     = <q-args>)
+command -nargs=1 NukevimSend    :py nukevimSend ([<q-args>]            )
 
 """
 " Main stuff (most of it is Python):
 """
 
-let g:vimyaTailAvailable = 0
+let g:nukevimTailAvailable = 0
 if exists ('g:Tail_Loaded')
-    let g:vimyaTailAvailable = 1
+    let g:nukevimTailAvailable = 1
 endif
 
-autocmd VimLeavePre * py __vimyaRemoveTempFiles ()
+autocmd VimLeavePre * py __nukevimRemoveTempFiles ()
 
 python << EOP
 
@@ -98,72 +98,72 @@ import vim
 
 # Global variables:
 #
-#   __vimyaLogPath   - If not empty, path of the log file currently used by Nuke.
-#   __vimyaTempFiles - Contains all the temporary files created (log files, MEL/Python files).
+#   __nukevimLogPath   - If not empty, path of the log file currently used by Nuke.
+#   __nukevimTempFiles - Contains all the temporary files created (log files, Python files).
 
-__vimyaLogPath   = ''
-__vimyaTempFiles = []
+__nukevimLogPath   = ''
+__nukevimTempFiles = []
 
-def __vimyaRemoveTempFiles ():
+def __nukevimRemoveTempFiles ():
 
     """Remove all temporary files.
 
-    __vimyaRemoveTempFiles () : None
+    __nukevimRemoveTempFiles () : None
 
     This function will be called automatically when leaving Vim. It will try to delete all the
     temporary files created during the session. There is no error handling, if deleting a file
     fails, the file will be left on disk.
 
-    If a log file is set this function will try to close it first, see __vimyaStopLogging().
+    If a log file is set this function will try to close it first, see __nukevimStopLogging().
 
     This function does not return anything.
     """
 
-    global __vimyaLogPath, __vimyaTempFiles
+    global __nukevimLogPath, __nukevimTempFiles
 
-    if __vimyaLogPath != '':
-        __vimyaStopLogging ()
+    if __nukevimLogPath != '':
+        __nukevimStopLogging ()
 
-    for tempFile in __vimyaTempFiles:
+    for tempFile in __nukevimTempFiles:
         if os.path.isfile (tempFile):
             try:
                 os.unlink (tempFile)
             except:
                 pass
 
-def __vimyaStopLogging ():
+def __nukevimStopLogging ():
 
     """Tell Nuke to stop logging and close all open log files.
 
-    __vimyaStopLogging () : bool
+    __nukevimStopLogging () : bool
 
     If a log file is currently set, this function will send the `cmdFileOutput -closeAll` command
-    to Nuke, causing all (!) open log files to be closed. The __vimyaLogPath variable will be set
+    to Nuke, causing all (!) open log files to be closed. The __nukevimLogPath variable will be set
     to an empty string if the log file could be closed successfully, its original value will be
-    added to the __vimyaTempFiles list for clean up on exit.
+    added to the __nukevimTempFiles list for clean up on exit.
 
     If the connection fails, an error message will be shown and the return value will be False,
     else this function returns True. If no log file has been set, this function does nothing and
     returns True.
     """
 
-    global __vimyaLogPath, __vimyaTempFiles
+    global __nukevimLogPath, __nukevimTempFiles
 
-    if __vimyaLogPath == '':
+    if __nukevimLogPath == '':
         return True
 
-    if vimyaSend (['cmdFileOutput -ca;']) == 1:
-        __vimyaTempFiles.append (__vimyaLogPath)
-        __vimyaLogPath = ''
+    if nukevimSend (['cmdFileOutput -ca;']) == 1:
+        __nukevimTempFiles.append (__nukevimLogPath)
+        __nukevimLogPath = ''
         return True
     else:
-        return __vimyaError ('Could not close the log file.')
+        return __nukevimError ('Could not close the log file.')
 
-def __vimyaError (message):
+def __nukevimError (message):
 
     """Print an error message.
 
-    __vimyaError (message) : False
+    __nukevimError (message) : False
 
     This function will print the error message in Vim's message area, using the appropriate
     error highlighting.
@@ -171,15 +171,15 @@ def __vimyaError (message):
     It will always return False.
     """
 
-    vim.command ('echohl ErrorMsg | echo "%s" | echohl None' % __vimyaEscape (message, '\\"'))
+    vim.command ('echohl ErrorMsg | echo "%s" | echohl None' % __nukevimEscape (message, '\\"'))
 
     return False
 
-def __vimyaEscape (string, characters):
+def __nukevimEscape (string, characters):
 
     """Escape specified characters in a string with backslash.
 
-    __vimyaEscape (string, characters) : str
+    __nukevimEscape (string, characters) : str
 
     Works like Vim's escape() function. Every occurrence of one of the characters in the characters
     parameter inside the string will be replaced by '\' + character. The backslash itself has to be
@@ -193,24 +193,24 @@ def __vimyaEscape (string, characters):
 
     return string
 
-def __vimyaFilenameEscape (filename):
+def __nukevimFilenameEscape (filename):
 
     """Apply Vim's fnameescape() function to a string.
 
-    __vimyaFilenameEscape (string) : str
+    __nukevimFilenameEscape (string) : str
 
     This function may be used to apply Vim's fnameescape() function to the supplied parameter.
 
     Returns the escaped string.
     """
 
-    return vim.eval ('fnameescape ("%s")' % __vimyaEscape (filename, '\\"'))
+    return vim.eval ('fnameescape ("%s")' % __nukevimEscape (filename, '\\"'))
 
-def __vimyaFixPath (filename):
+def __nukevimFixPath (filename):
 
     """Replace all backslashes in the file name with slashes on Windows platforms.
 
-    __vimyaFixPath (filename) : str
+    __nukevimFixPath (filename) : str
 
     Replaces all backslashes in the file name with slashes on Windows platforms.
 
@@ -222,11 +222,11 @@ def __vimyaFixPath (filename):
     else:
         return filename
 
-def __vimyaFindLog ():
+def __nukevimFindLog ():
 
     """Find the buffer and tab that contains the Nuke log.
 
-    __vimyaFindLog () : (int, int)
+    __nukevimFindLog () : (int, int)
 
     If a Nuke log file is currently set, this function will return the number of the tab page and
     the buffer number in which this log file is opened. Note: Searching will stop on first match!
@@ -238,10 +238,10 @@ def __vimyaFindLog ():
     is not opened in any window (and thus in no tab), the return value will be (0, bufferNumber).
     """
 
-    global __vimyaLogPath
+    global __nukevimLogPath
 
-    if __vimyaLogPath != '':
-        bufferIndex  = int (vim.eval ('bufnr     ("%s")' % __vimyaEscape (__vimyaLogPath, '\\"')))
+    if __nukevimLogPath != '':
+        bufferIndex  = int (vim.eval ('bufnr     ("%s")' % __nukevimEscape (__nukevimLogPath, '\\"')))
         bufferExists = int (vim.eval ('bufexists ( %d )' % int           (bufferIndex          )))
         if bufferExists:
             tabNum = int (vim.eval ('tabpagenr ("$")'))
@@ -253,11 +253,11 @@ def __vimyaFindLog ():
 
     return (0, 0)
 
-def vimyaRefreshLog ():
+def nukevimRefreshLog ():
 
     """Update the log file in the preview window.
 
-    vimyaRefreshLog () : bool
+    nukevimRefreshLog () : bool
 
     This function will update the log file if it is currently opened in a preview window. If the
     window of the log file is not located in the current tab, it will switch to the window's tab.
@@ -269,14 +269,14 @@ def vimyaRefreshLog ():
     prints an error message).
     """
 
-    global __vimyaLogPath
+    global __nukevimLogPath
 
-    if __vimyaLogPath != '':
+    if __nukevimLogPath != '':
 
-        (tabIndex, bufferIndex) = __vimyaFindLog ()
+        (tabIndex, bufferIndex) = __nukevimFindLog ()
 
         if not tabIndex:
-            return __vimyaError ('No log file window found.')
+            return __nukevimError ('No log file window found.')
         else:
             vim.command ('tabnext %d' % tabIndex)
             winIndex = int (vim.eval ('bufwinnr (%d)' % bufferIndex))
@@ -285,44 +285,44 @@ def vimyaRefreshLog ():
 
     return True
 
-def vimyaOpenLog ():
+def nukevimOpenLog ():
 
     """Open the log file using the Tail Bundle plugin.
 
-    vimyaOpenLog () : bool
+    nukevimOpenLog () : bool
 
     This function will open the currently used log file using the configured Tail Bundle command,
-    unless this is disabled. The options g:vimyaShowLog, g:vimyaTailCommand and g:vimyaSplitBelow
+    unless this is disabled. The options g:nukevimShowLog, g:nukevimTailCommand and g:nukevimSplitBelow
     may be used to change the behaviour. If no log file is set, or the file is already opened in a
-    window, this function does nothing. If g:vimyaTailCommand is not 'TabTail', any preview window
+    window, this function does nothing. If g:nukevimTailCommand is not 'TabTail', any preview window
     currently opened will be closed.
 
     Returns False in case of an error, True in all other cases.
     """
 
-    global __vimyaLogPath
+    global __nukevimLogPath
 
-    (tabIndex, bufferIndex) = __vimyaFindLog ()
+    (tabIndex, bufferIndex) = __nukevimFindLog ()
 
-    if __vimyaLogPath != '' and tabIndex == 0:
+    if __nukevimLogPath != '' and tabIndex == 0:
 
-        splitBelowGlobal = int (vim.eval ('&splitbelow'       ))
-        splitBelowVimya  = int (vim.eval ('g:vimyaSplitBelow' ))
-        tailCommand      =      vim.eval ('g:vimyaTailCommand')
+        splitBelowGlobal  = int (vim.eval ('&splitbelow'       ))
+        splitBelowNukevim = int (vim.eval ('g:nukevimSplitBelow' ))
+        tailCommand       =      vim.eval ('g:nukevimTailCommand')
 
         if tailCommand not in ('Tail', 'STail', 'TabTail'):
-            return __vimyaError ('Invalid value for g:vimyaTailCommand.')
+            return __nukevimError ('Invalid value for g:nukevimTailCommand.')
 
         success = False
 
         try:
             if tailCommand != 'TabTail':
                 vim.command ('pclose')
-            if splitBelowVimya:
+            if splitBelowNukevim:
                 vim.command ('set splitbelow')
             else:
                 vim.command ('set nosplitbelow')
-            vim.command ('%s %s' % (tailCommand, __vimyaFilenameEscape (__vimyaLogPath)))
+            vim.command ('%s %s' % (tailCommand, __nukevimFilenameEscape (__nukevimLogPath)))
             if tailCommand != 'TabTail':
                 vim.command ('wincmd p')
             success = True
@@ -336,54 +336,54 @@ def vimyaOpenLog ():
 
     return True
 
-def vimyaResetLog ():
+def nukevimResetLog ():
 
     """(Re)set Nuke's log file.
 
-    vimyaResetLog () : bool
+    nukevimResetLog () : bool
 
     This function will create a temporary file and instruct Nuke to use it as its log file. If a
     log file is already set, the command to close all (!) log files will be sent to Nuke first,
-    then the new file is set. The log file will be opened in Vim if enabled, see vimyaOpenLog()
-    for details. If g:vimyaShowLog is not enabled (or the Tail Bundle plugin is not available), no
+    then the new file is set. The log file will be opened in Vim if enabled, see nukevimOpenLog()
+    for details. If g:nukevimShowLog is not enabled (or the Tail Bundle plugin is not available), no
     new log file will be created (if a log file should be set, it will still be closed, though).
 
     Returns True on success, False in case of failure.
     """
 
-    global __vimyaLogPath
+    global __nukevimLogPath
 
-    if __vimyaLogPath != '':
-        if not __vimyaStopLogging ():
+    if __nukevimLogPath != '':
+        if not __nukevimStopLogging ():
             return False
 
-    tailAvailable = int (vim.eval ('g:vimyaTailAvailable'))
-    showLog       = int (vim.eval ('g:vimyaShowLog'      ))
+    tailAvailable = int (vim.eval ('g:nukevimTailAvailable'))
+    showLog       = int (vim.eval ('g:nukevimShowLog'      ))
 
     if tailAvailable and showLog:
 
-        tempDir = vim.eval ('g:vimyaTempDir')
+        tempDir = vim.eval ('g:nukevimTempDir')
         if tempDir != '':
             tempfile.tempdir = tempDir
         else:
             tempfile.tempdir = None
 
-        (logHandle, logPath) = tempfile.mkstemp (suffix = '.log', prefix = 'vimya.', text = 1)
-        __vimyaLogPath = vim.eval ('expand ("%s")' % __vimyaEscape (logPath, '\\"'))
+        (logHandle, logPath) = tempfile.mkstemp (suffix = '.log', prefix = 'nukevim.', text = 1)
+        __nukevimLogPath = vim.eval ('expand ("%s")' % __nukevimEscape (logPath, '\\"'))
 
-        escapedLogPath = __vimyaEscape (__vimyaFixPath (__vimyaLogPath), '\\"')
-        if vimyaSend (['cmdFileOutput -o "%s";' % escapedLogPath]) != 1:
+        escapedLogPath = __nukevimEscape (__nukevimFixPath (__nukevimLogPath), '\\"')
+        if nukevimSend (['cmdFileOutput -o "%s";' % escapedLogPath]) != 1:
             return False
 
-        return vimyaOpenLog ()
+        return nukevimOpenLog ()
 
     return True
 
-def vimyaSend (commands):
+def nukevimSend (commands):
 
     """Send commands to Nuke's command port.
 
-    vimyaSend (commands) : int
+    nukevimSend (commands) : int
 
     This function will open a connection to Nuke's command port (as configured), and send the
     commands - which must be a list of one or more strings - to Nuke. A newline will be appended
@@ -395,10 +395,10 @@ def vimyaSend (commands):
     Returns the number of commands successfully sent to Nuke.
     """
 
-    socketPath =      vim.eval ('g:vimyaSocket' )
-    timeout    =      vim.eval ('g:vimyaTimeout')
-    host       =      vim.eval ('g:vimyaHost'   )
-    port       = int (vim.eval ('g:vimyaPort'   ))
+    socketPath =      vim.eval ('g:nukevimSocket' )
+    timeout    =      vim.eval ('g:nukevimTimeout')
+    host       =      vim.eval ('g:nukevimHost'   )
+    port       = int (vim.eval ('g:nukevimPort'   ))
 
     try:
         if socketPath != '':
@@ -410,7 +410,7 @@ def vimyaSend (commands):
         else:
             connection.settimeout (float (timeout))
     except socket.error as e:
-        __vimyaError ('Could not initialize the socket: %s' % str (e))
+        __nukevimError ('Could not initialize the socket: %s' % str (e))
         return 0
 
     try:
@@ -419,7 +419,7 @@ def vimyaSend (commands):
         else:
             connection.connect ((host, port))
     except socket.error as e:
-        __vimyaError ('Could not connect to command port: %s' % str (e))
+        __nukevimError ('Could not connect to command port: %s' % str (e))
         return 0
 
     sent = 0
@@ -430,18 +430,18 @@ def vimyaSend (commands):
                 connection.send ('%s\n' % command)
                 sent = sent + 1
         except socket.error as e:
-            __vimyaError ('Sending a command failed: %s' % str (e))
+            __nukevimError ('Sending a command failed: %s' % str (e))
     finally:
         connection.shutdown (socket.SHUT_WR)
         connection.close ()
 
     return sent
 
-def vimyaRun (forceBuffer = False, userCmd = None):
+def nukevimRun (forceBuffer = False, userCmd = None):
 
     """Sent (partial) buffer contents or a single command to Nuke's command port.
 
-    vimyaRun (forcedBuffer = False, userCmd = None) : bool
+    nukevimRun (forcedBuffer = False, userCmd = None) : bool
 
     If userCmd is not specified, saves the current buffer to a temporary file and instructs Nuke to
     source this file. In visual mode only the selected lines are used (for partially selected lines
@@ -452,39 +452,39 @@ def vimyaRun (forceBuffer = False, userCmd = None):
     buffer content will be ignored.
 
     In both cases, the current buffer's file type determines how the file is executed by Nuke,
-    either as MEL or Python script. The file type must be either 'mel' or 'python', or not set at
-    all, in which case the 'g:vimyaDefaultFiletype' will be used.
+    as Python script. The file type must be 'python', or not set at all, in which case the
+    'g:nukevimDefaultFiletype' will be used.
 
     If Nuke's log is not yet set, it will be set and opened (if configured), depending on the
-    'g:vimyaShowLog' setting. See vimyaResetLog() for details. If 'g:vimyaForceRefresh' is set,
-    vimyaRefreshLog() will be called after waiting for 'g:vimyaRefreshWait' seconds after all
+    'g:nukevimShowLog' setting. See nukevimResetLog() for details. If 'g:nukevimForceRefresh' is set,
+    nukevimRefreshLog() will be called after waiting for 'g:nukevimRefreshWait' seconds after all
     commands have been sent to Nuke. Note that if a log file has been set and you close the log
-    window, it will not be opened automatically, you may use vimyaOpenLog() to open it again.
+    window, it will not be opened automatically, you may use nukevimOpenLog() to open it again.
 
     For backwards compatibility, this function is also available as sendBufferToNuke(). The usage
-    is exactly the same as for vimyaRun().
+    is exactly the same as for nukevimRun().
 
     Returns False if an error occured, else True.
     """
 
-    global __vimyaLogPath, __vimyaTempFiles
+    global __nukevimLogPath, __nukevimTempFiles
 
     filetype = vim.eval ('&g:filetype')
-    if filetype not in ['', 'mel', 'python']:
-        return __vimyaError ('Error: Supported filetypes: "python", "mel", None.')
+    if filetype not in ['', 'python']:
+        return __nukevimError ('Error: Supported filetypes: "python", None.')
 
-    if __vimyaLogPath == '':
-        if not vimyaResetLog ():
+    if __nukevimLogPath == '':
+        if not nukevimResetLog ():
             return False
 
-    tempDir = vim.eval ('g:vimyaTempDir')
+    tempDir = vim.eval ('g:nukevimTempDir')
     if tempDir != '':
         tempfile.tempdir = tempDir
     else:
         tempfile.tempdir = None
 
-    (tmpHandle, tmpPath) = tempfile.mkstemp (suffix = '.tmp', prefix = 'vimya.', text = 1)
-    __vimyaTempFiles.append (tmpPath)
+    (tmpHandle, tmpPath) = tempfile.mkstemp (suffix = '.tmp', prefix = 'nukevim.', text = 1)
+    __nukevimTempFiles.append(tmpPath)
 
     try:
         if userCmd:
@@ -503,30 +503,28 @@ def vimyaRun (forceBuffer = False, userCmd = None):
 
     commands = ['commandEcho -state on -lineNumbers on;']
 
-    defaultType = vim.eval ('g:vimyaDefaultFiletype')
-    escapedPath = __vimyaEscape (__vimyaFixPath (tmpPath), '\\"')
+    defaultType = vim.eval ('g:nukevimDefaultFiletype')
+    escapedPath = __nukevimEscape (__nukevimFixPath (tmpPath), '\\"')
 
     if filetype == 'python' or (filetype == '' and defaultType == 'python'):
         commands.append ('python ("execfile (\\"%s\\")");' % escapedPath)
-    elif filetype == 'mel' or (filetype == '' and defaultType == 'mel'):
-        commands.append ('source "%s";' % escapedPath)
 
     commands.append ('commandEcho -state off -lineNumbers off;')
     commands.append ('sysFile -delete "%s";' % escapedPath)
 
-    sent = vimyaSend (commands)
+    sent = nukevimSend (commands)
     if sent != len (commands):
-        return __vimyaError ('%d commands out of %d sent successfully.' % (sent, len (commands)))
+        return __nukevimError ('%d commands out of %d sent successfully.' % (sent, len (commands)))
 
-    refresh = int   (vim.eval ('g:vimyaForceRefresh'))
-    wait    = float (vim.eval ('g:vimyaRefreshWait' ))
-    if __vimyaLogPath != '' and refresh:
+    refresh = int   (vim.eval ('g:nukevimForceRefresh'))
+    wait    = float (vim.eval ('g:nukevimRefreshWait' ))
+    if __nukevimLogPath != '' and refresh:
         time.sleep (wait)
-        return vimyaRefreshLog ()
+        return nukevimRefreshLog ()
 
     return True
 
-# For backwards comapatibility, sendBufferToNuke() will be an alias for vimyaRun():
+# For backwards comapatibility, sendBufferToNuke() will be an alias for nukevimRun():
 
-sendBufferToNuke = vimyaRun
+sendBufferToNuke = nukevimRun
 

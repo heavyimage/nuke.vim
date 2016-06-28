@@ -97,11 +97,10 @@ import time
 import vim
 
 # Global variables:
-#
-#   __nukevimLogPath   - If not empty, path of the log file currently used by Nuke.
-#   __nukevimTempFiles - Contains all the temporary files created (log files, Python files).
 
+# If not empty, path of the log file currently used by Nuke.
 __nukevimLogPath   = ''
+# Contains all the temporary files created (log files, Python files).
 __nukevimTempFiles = []
 
 def __nukevimRemoveTempFiles():

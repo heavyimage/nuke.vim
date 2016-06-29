@@ -239,7 +239,9 @@ def nukevimSend(commands):
     try:
         try:
             for command in commands:
+                __nukevimMsg("Sending %s" % command)
                 connection.send('%s\n' % command)
+
                 sent = sent + 1
         except socket.error as e:
             __nukevimError('Sending a command failed: %s' % str(e))

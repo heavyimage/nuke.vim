@@ -243,11 +243,17 @@ def nukevimSend(commands):
                 connection.send('%s\n' % command)
 
                 sent = sent + 1
+
+                data = connection.recv(4096)
+                __nukevimMsg("Recieved from nuke: '%s'" % data.replace('\0', '\n'))
+
         except socket.error as e:
             __nukevimError('Sending a command failed: %s' % str(e))
+
     finally:
         connection.shutdown(socket.SHUT_WR)
         connection.close()
+
 
     return sent
 

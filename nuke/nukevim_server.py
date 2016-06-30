@@ -1,6 +1,6 @@
 ##
-#  Copyright (c)	2012 sydh <sydhds at gmail dot com>
-#                	All Rights Reserved
+#  Copyright (c)        2012 sydh <sydhds at gmail dot com>
+#                       All Rights Reserved
 #
 #  This program is free software. It comes without any warranty, to
 #  the extent permitted by applicable law. You can redistribute it
@@ -17,75 +17,75 @@ import nukescripts
 
 class Server():
 
-	def __init__(self, host, port, stopEvent):
-		
-		self._stopEvent = stopEvent
-		
-		for res in socket.getaddrinfo(host, port, socket.AF_UNSPEC, socket.SOCK_STREAM, 0, socket.AI_PASSIVE):
-			af, socktype, proto, canonname, sa = res
+    def __init__(self, host, port, stopEvent):
 
-			try:
-				self.s = socket.socket(af, socktype, proto)
-			except socket.error, msg:
-				self.s = None
-				continue
+        self._stopEvent = stopEvent
 
-			try:
-				self.s.bind(sa)
-				self.s.listen(1)
-			except socket.error, msg:
-				self.s.close()
-				self.s = None
-				continue
-			
-			break
+        for res in socket.getaddrinfo(host, port, socket.AF_UNSPEC, socket.SOCK_STREAM, 0, socket.AI_PASSIVE):
+            af, socktype, proto, canonname, sa = res
 
-		if not self.s:
-			raise RuntimeError, 'Unable to initialise server: %s' % msg
+            try:
+                self.s = socket.socket(af, socktype, proto)
+            except socket.error, msg:
+                self.s = None
+                continue
 
-	def start(self):
+            try:
+                self.s.bind(sa)
+                self.s.listen(1)
+            except socket.error, msg:
+                self.s.close()
+                self.s = None
+                continue
 
-		done = False
-		while not done and not self._stopEvent.isSet():
-		
-			inr, outr, exr = select.select([self.s], [], [], 1.0) 
-			
-			for s in inr:
-				if s == self.s:
-					(conn, addr) = self.s.accept()
-					nuke.tprint('Connection from %s', addr)
+            break
 
-					data = conn.recv(1024)
+        if not self.s:
+            raise RuntimeError, 'Unable to initialise server: %s' % msg
 
-					if data == 'shutdown':
-						done = True
-					else:	
-						nukescripts.utils.executeInMainThread(nuke.load, (data,))
+    def start(self):
 
-					conn.close()
-				
-		nuke.tprint('commandPort shutdown')
+        done = False
+        while not done and not self._stopEvent.isSet():
+
+            inr, outr, exr = select.select([self.s], [], [], 1.0)
+
+            for s in inr:
+                if s == self.s:
+                    (conn, addr) = self.s.accept()
+                    nuke.tprint('Connection from %s', addr)
+
+                    data = conn.recv(1024)
+
+                    if data == 'shutdown':
+                        done = True
+                    else:
+                        nukescripts.utils.executeInMainThread(nuke.load, (data,))
+
+                    conn.close()
+
+        nuke.tprint('commandPort shutdown')
 
 class serverThread(threading.Thread):
-	
-	def __init__(self, name, host, port):
-		
-		threading.Thread.__init__(self, name=name)
-		self._stopEvent = threading.Event()
-		self.host = host
-		self.port = port
-		self.name = name
-		# prevent Nuke hang at exit 
-		self.daemon = True
 
-	def run(self):
-		s = Server(self.host, self.port, self._stopEvent)
-		s.start()
-		
-	def stop(self):
-		self._stopEvent.set()
+    def __init__(self, name, host, port):
+
+        threading.Thread.__init__(self, name=name)
+        self._stopEvent = threading.Event()
+        self.host = host
+        self.port = port
+        self.name = name
+        # prevent Nuke hang at exit
+        self.daemon = True
+
+    def run(self):
+        s = Server(self.host, self.port, self._stopEvent)
+        s.start()
+
+    def stop(self):
+        self._stopEvent.set()
 
 def start(host='localhost', port=50777):
-	nuke.tprint('starting commandPort on %s:%s' % (host, port))
-	t = serverThread('commandPort', host, port)
-	t.start()
+    nuke.tprint('starting commandPort on %s:%s' % (host, port))
+    t = serverThread('commandPort', host, port)
+    t.start()

@@ -191,20 +191,21 @@ def __nukevimFixPath(filename):
     else:
         return filename
 
-def nukevimSend(commands):
+def nukevimSend(instructions_path):
 
-    """Send commands to Nuke's command port.
+    """Send insructions to Nuke via a tempfile with python commands
 
-    nukevimSend(commands) : int
+    nukevimSend(instructions_path) : int
 
-    This function will open a connection to Nuke's command port (as configured), and send the
-    commands - which must be a list of one or more strings - to Nuke. A newline will be appended
-    to every command automatically. Commands will be sent in the order they appear in the list.
+    This function will open a connection to a socket server running in nuke
+    (as configured), and send the path to a file containing python code.  The
+    corresponding server component will recieve the path and exec the contents.
 
-    Socket exceptions will be caught and an appropriate error message will be displayed. After an
-    exception, no attempt will be made to send any more commands from the list.
+    Socket exceptions will be caught and an appropriate error message will be
+    displayed. After an exception, no attempt will be made to send any more
+    commands from the list.
 
-    Returns the number of commands successfully sent to Nuke.
+    Returns any output recieved.
     """
 
     socketPath =      vim.eval('g:nukevimSocket' )
@@ -234,18 +235,14 @@ def nukevimSend(commands):
         __nukevimError('Could not connect to command port: %s' % str(e))
         return 0
 
-    sent = 0
-
     try:
         try:
-            for command in commands:
-                __nukevimMsg("Sending %s" % command)
-                connection.send('%s\n' % command)
+            __nukevimMsg("Sending %s" % instructions_path)
+            connection.send(instructions_path)
 
-                sent = sent + 1
-
-                data = connection.recv(4096)
-                __nukevimMsg("Recieved from nuke: '%s'" % data.replace('\0', '\n'))
+            data = connection.recv(4096)
+            # TODO: replacement of null terminators not working...
+            return data.replace('\0', '\n')
 
         except socket.error as e:
             __nukevimError('Sending a command failed: %s' % str(e))
@@ -253,9 +250,6 @@ def nukevimSend(commands):
     finally:
         connection.shutdown(socket.SHUT_WR)
         connection.close()
-
-
-    return sent
 
 def nukevimRun(forceBuffer = False):
 

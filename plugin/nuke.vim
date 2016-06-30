@@ -253,13 +253,15 @@ def nukevimSend(instructions_path):
 
 def nukevimRun(forceBuffer = False):
 
-    """Sent (partial) buffer contents or a single command to Nuke's command port.
+    """Sent (partial) buffer contents to nuke via a tempory instructions file
 
     nukevimRun(forcedBuffer = False) : bool
 
     Saves the current buffer to a temporary file and instructs Nuke to source this file. In visual
     mode only the selected lines are used (for partially selected lines the complete line will be
-    included). In visual mode, forceBuffer may be set to True to force execution of the complete buffer.
+    included).
+
+    If any output is recieved, it is logged to vim's :messages queue via echom
 
     Returns False if an error occured, else True.
     """
@@ -291,16 +293,11 @@ def nukevimRun(forceBuffer = False):
     finally:
         os.close(tmpHandle)
 
-    escapedPath = __nukevimEscape(__nukevimFixPath(tmpPath), '\\"')
+    escaped_path = __nukevimEscape(__nukevimFixPath(tmpPath), '\\"')
 
-    commands = []
-    commands.append(escapedPath)
-
-    # Don't delete the commands -- could be interesting
-    # commands.append('sysFile -delete "%s";' % escapedPath)
-
-    sent = nukevimSend(commands)
-    if sent != len(commands):
-        return __nukevimMsg('%d commands out of %d sent successfully.' %(sent, len(commands)))
-
-    return True
+    response = nukevimSend(escaped_path)
+    if response:
+        __nukevimMsg("Recieved from nuke: '%s'" % response)
+        return True
+    else:
+        return False

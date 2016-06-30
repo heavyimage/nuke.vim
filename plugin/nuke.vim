@@ -297,11 +297,10 @@ def nukevimRun(forceBuffer = False):
     finally:
         os.close(tmpHandle)
 
-    commands = ['commandEcho -state on -lineNumbers on;']
-
     escapedPath = __nukevimEscape(__nukevimFixPath(tmpPath), '\\"')
 
-    commands.append('python("execfile(\\"%s\\")");' % escapedPath)
+    commands = []
+    commands.append(escapedPath)
 
     commands.append('commandEcho -state off -lineNumbers off;')
     commands.append('sysFile -delete "%s";' % escapedPath)

@@ -302,11 +302,11 @@ def nukevimRun(forceBuffer = False):
     commands = []
     commands.append(escapedPath)
 
-    commands.append('commandEcho -state off -lineNumbers off;')
-    commands.append('sysFile -delete "%s";' % escapedPath)
+    # Don't delete the commands -- could be interesting
+    # commands.append('sysFile -delete "%s";' % escapedPath)
 
     sent = nukevimSend(commands)
     if sent != len(commands):
-        return __nukevimError('%d commands out of %d sent successfully.' %(sent, len(commands)))
+        return __nukevimMsg('%d commands out of %d sent successfully.' %(sent, len(commands)))
 
     return True

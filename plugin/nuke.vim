@@ -44,11 +44,9 @@ function NukevimSetConfig(name, default)
     endif
 endfunction
 
-call NukevimSetConfig( 'DefaultFiletype',  'python'      )
-call NukevimSetConfig( 'Host',             'nomad.local' )
+call NukevimSetConfig( 'Host',             'localhost' )
 call NukevimSetConfig( 'Port',             50777         )
 call NukevimSetConfig( 'Socket',           ''            )
-call NukevimSetConfig( 'SplitBelow',       &splitbelow   )
 call NukevimSetConfig( 'TempDir',          ''            )
 call NukevimSetConfig( 'Timeout',          5.0           )
 

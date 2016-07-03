@@ -68,8 +68,8 @@ endif
 """
 
 command -nargs=0 NukevimRun     :py nukevimRun()
-command -nargs=0 NukevimBuffer  :py nukevimRun(forceBuffer = True    )
-command -nargs=1 NukevimSend    :py nukevimSend([<q-args>]            )
+command -nargs=0 NukevimBuffer  :py nukevimRun(forceBuffer = True)
+command -nargs=1 NukevimSend    :py nukevimSend([<q-args>])
 
 """
 " Main stuff (most of it is Python):

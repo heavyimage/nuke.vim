@@ -90,9 +90,9 @@ class Server():
 
         print ("Code from nuke.vim: \n%s# Result: \n"
                "%s\n" % (text, result))
-        
+
         return result
-    
+
 
 
     def start(self):

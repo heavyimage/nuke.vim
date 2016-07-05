@@ -1,37 +1,35 @@
-*vimya.txt*           Vimya 0.5 - Send buffer contents to Autodesk Maya
+nukevim.txtFor    Vim version 7.4    Last change: 2016 July 4
 
 =======================================================================
 
-0. Contents                                                     *vimya*
+0. Contents                                                   *nukevim*
 
-    1. Overview                                   |vimya-overview|
-    2. Requirements                               |vimya-requirements|
-    3. Installation                               |vimya-installation|
-    4. Preparing Maya                             |vimya-maya|
-    5. Configuration Options                      |vimya-configuration|
-    6. Functions                                  |vimya-functions|
-    7. Key Mappings                               |vimya-mappings|
-    8. Ex Commands                                |vimya-commands|
-    9. Additional Information                     |vimya-info|
-   10. Changelog                                  |vimya-changelog|
-   11. License                                    |vimya-license|
+    1. Overview                                 |nukevim-overview|
+    2. Requirements                             |nukevim-requirements|
+    3. Installation                             |nukevim-installation|
+    4. Preparing Nuke                           |nukevim-nuke|
+    5. Configuration Options                    |nukevim-configuration|
+    6. Functions                                |nukevim-functions|
+    7. Key Mappings                             |nukevim-mappings|
+    8. Ex Commands                              |nukevim-commands|
+    9. Additional Information                   |nukevim-info|
 
 =======================================================================
 
-1. Overview                                            *vimya-overview*
+1. Overview                                          *nukevim-overview*
 
-   Vimya is plugin for the Vim editor that may be used to execute the
-   contents of a Vim buffer, the current |visual-mode| selection, or a
-   single command in Autodesk Maya.
+   nuke.vim is plugin for the Vim editor that may be used to execute 
+   the contents of a Vim buffer, or the current |visual-mode| 
+   selection, in The Foundry's Nuke.
 
-   The plugin will save the command(s) to be executed in a temporary
-   file and tell Maya via the command port to source this file. Both
-   MEL and Python scripts are supported, Maya's log can optionally be
-   opened in a separate preview window or tab in Vim.
+   The plugin saves the command(s) to be executed (only python is 
+   supported at this time but if TCL would be useful for anyone it's 
+   easy to add!) in a temporary file and tells Nuke via a socket 
+   connection to source this file. 
 
 =======================================================================
 
-2. Requirements                                    *vimya-requirements*
+2. Requirements                                  *nukevim-requirements*
 
    Python support is required for this plugin to run, check with
 >
@@ -41,139 +39,81 @@
 >
      :echo has ('python')
 <
-   Additionally, you may install the 'Tail Bundle' plugin, download it
-   from
->
-     http://www.vim.org/scripts/script.php?script_id=1714
-<
-   and install it before using Vimya to view the output of Maya (i.e.
-   the stuff printed in the script editor) in Vim. You do not need to
-   install it if you do not need this feature.
 
 =======================================================================
 
-3. Installation                                    *vimya-installation*
+3. Installation                                 *nuke.vim-installation*
 
-   Using the Vimball archive is recommended. It requires the 'Vimball'
-   plugin, get it at:
->
-     http://www.vim.org/scripts/script.php?script_id=1502
-<
-   All you need to do is open the file in Vim:
->
-     $ vim vimya-0.5.vba
-<
-   and source it:
->
-     :so %
-<
-   When using the Zip archive: Extract the contents and copy the files
-   in the 'doc' and 'plugin' subfolders to the appropriate folders in
-   your runtime path. Usually this is '~/.vim/' (see |'runtimepath'|
-   and |add-global-plugin| for details). You may need to create the
-   folders 'doc' and 'plugin' if they do not exist.
-
-   You may also install Vimya directly from the Git repository if you
+   You may install nuke.vim directly from a git repository if you
    use 'Pathogen', which you can get here:
 >
      http://www.vim.org/scripts/script.php?script_id=2332
 <
-   With 'Pathogen' installed, you just need to clone the Vimya Git
+   Using Pathogen is highly recommend.
+
+   With 'Pathogen' installed, you just need to clone the nuke.vim git
    repository to the bundle directory in your runtime path:
 >
-     git clone https://bitbucket.org/goeb/vimya.git ~/.vim/bundle/vimya
+     git clone https://github.com/heavyimage/nuke.vim ~/.vim/bundle/
 <
-   This also allows you to update Vimya by pulling the latest version
-   with Git.
+   This also allows you to update nuke.vim by pulling the latest version
+   with git.
+
+   If using a zip archive: Extract the contents and copy the files
+   in the 'doc', 'plugin', 'ftdetect', and 'syntax' subdirectories to 
+   the appropriate folders in your runtime path. Usually this is 
+   '~/.vim/' (see |'runtimepath'| and |add-global-plugin| for details).
+   You may need to create the directories if they do not exist.
 
    When all files are in place, start Vim and run the |:helptags|
    command to update the tags index (this is not necessary if you use
    the Vimball method).
 
-   See |vimya-configuration|, |vimya-functions|, |vimya-mappings| and
-   |vimya-commands| for details on how to setup and use this plugin.
+   See |nukevim-configuration|, |nukevim-functions|, |nukevim-mappings|
+   and |nukevim-commands| for details on how to setup and use this 
+   plugin.
 
 =======================================================================
 
-4. Preparing Maya                                          *vimya-maya*
+4. Preparing Nuke                                        *nukevim-nuke*
 
-   You need to open a command port in Maya that will be used by Vimya
-   to send the required commands. To open port 12345 (Vimya's default
-   port) you may copy the following command to your userSetup.mel file:
+   In order to recieve commands from nuke.vim, Nuke will need to start
+   a socket server during startup.  nuke.vim is distributed with
+   a python script that will open such a server if sourced in a meny.py
+   (or hypthoetically in an init.py) file.
+
+   Copy (or symlink, prefered) the nuke/nukevim_server.py file into your
+   ~/.nuke directory and source it with:
+
 >
-     if (! `commandPort -q ":12345"`) commandPort -nr -n ":12345";
+      #Start nukevim server
+      import nukevim_server
+      nukevim_server.start()
 <
-   Refer to the Maya documentation for more details. Note that Vimya
-   does not read anything from the socket, usage of the -noreturn (-nr)
-   option is recommended (it should work without it, though).
 
-   On systems that support Unix domain sockets, these may be used for
-   communication:
->
-     if (! `commandPort -q "socket"`) commandPort -nr -n "socket";
-<
-   Again, please see the Maya documentation for details.
-
-   Do not set the -sourceType (-stp) option to 'python', even if you
-   want to send Python commands! Vimya will send the appropriate MEL
-   commands to run Python code if required.
-
-   Note that there is no authentication, opening a command port may be
-   A SECURITY RISK! This is especially true when INET sockets are used
-   instead of Unix domain sockets.
+   Note that there is no authentication, and so opening this server
+   might be a SECURITY RISK! 
 
 =======================================================================
 
-5. Configuration Options                          *vimya-configuration*
+5. Configuration Options                        *nukevim-configuration*
 
-   This plugin uses the following configuration variables, they can be
+   This plugin uses the following configuration variables; they can be
    set in your |.vimrc| file:
 
-   *g:vimyaHost*                                            *vimyaHost*
+   *g:nukevimHost*                                        *nukevimHost*
 
-     Default: '127.0.0.1'
+     Default: 'localhost'
 
-     String that specifies the address of the host to connect to when
-     using an INET socket for communication.
+     String that specifies the address of the host.
 
-   *g:vimyaPort*                                            *vimyaPort*
+   *g:nukevimPort*                                        *nukevimPort*
 
-     Default: 12345
+     Default: 50777
 
-     The port number Maya is listening on for connections when using an
-     INET socket. See |vimya-maya| and the Maya manual for details.
+     The port number Nuke is listening on for connections.
 
-   *g:vimyaSocket*                                        *vimyaSocket*
-
-     Default: ''
-
-     Path to the Unix domain socket to connect to. If this is set to an
-     empty string (the default) an INET connection will be used (as
-     sepcified by |g:vimyaHost| and |g:vimyaPort|). If this is set to a
-     non-empty string, the host and port settings will be ignored and a
-     connection to the specified Unix domain socket will be used. If
-     set, it must be the full (absolute) path name of the socket.
-
-   *g:vimyaTimeout*                                      *vimyaTimeout*
-
-     Default: 5.0
-
-     The timeout that will be used for the connection. If this is a
-     float value, it will be used as is, if it is set to an empty
-     string, timeout will be set to None. See the documentation of
-     Python's socket library for details on socket.settimeout().
-
-   *g:vimyaDefaultFiletype*                      *vimyaDefaultFiletype*
-
-     Default: 'python'
-
-     Vimya needs to know if the code that should be executed by Maya
-     is MEL or Python code. Usually this is determined by the current
-     buffer's |'filetype'|. If the file type is not set, e.g. when a
-     new file is created, this default value is used instead. It must
-     be set to either 'mel' or 'python'.
-
-   *g:vimyaTempDir*                                      *vimyaTempDir*
+   *g:nukevimTempDir*                                  *nukevimTempDir*
 
      Default: ''
 
@@ -182,74 +122,31 @@
      system's default temporary path will be used, as determined by
      Python's tempfile library. See there for more details.
 
-   *g:vimyaShowLog*                                      *vimyaShowLog*
+   *g:nukevimTimeout*                                  *nukevimTimeout*
 
-     Default: 1
+     Default: 5.0
 
-     If you have the 'Tail Bundle' plugin installed and you do not want
-     the Maya script editor log to be opened, set this option to 0.
-
-   *g:vimyaTailCommand*                              *vimyaTailCommand*
-
-     Default: 'TabTail'
-
-     The 'Tail Bundle' command used to open the log (if enabled, see
-     above). The default is 'TabTail' to open the log in a new tab.
-     Set it to 'Tail' (or 'STail') if a non-tabbed preview window
-     should be used instead. Values other than 'TabTail', 'Tail' and
-     'STail' are invalid.
-
-   *g:vimyaSplitBelow*                                *vimyaSplitBelow*
-
-     Default: &splitbelow
-
-     If 'Tail' or 'STail' are used as |g:vimyaTailCommand|, this option
-     may be used to override the global |'splitbelow'| setting. The
-     default is the same as the global value. After opening the log
-     file the original setting will be restored.
-
-   *g:vimyaForceRefresh*                            *vimyaForceRefresh*
-
-     Default: 0
-
-     Setting this option to 1 will cause |vimyaRefreshLog()| to be
-     called at the end of the |vimyaRun()| (or |sendBufferToMaya()|)
-     function after all required commands have been sent to Maya. See
-     also |g:vimyaRefreshWait| below.
-
-   *g:vimyaRefreshWait*                              *vimyaRefreshWait*
-
-     Default: 2.0
-
-     If |g:vimyaForceRefresh| is enabled, wait this many seconds before
-     calling |vimyaRefreshLog()| after the commands have been sent.
+     The timeout that will be used for the connection. If this is a
+     float value, it will be used as is, if it is set to an empty
+     string, timeout will be set to None. See the documentation of
+     Python's socket library for details on socket.settimeout().
 
    Example setting in your |.vimrc| file:
 >
-     let g:vimyaPort=54321
+     let g:nukevimPort=54321
 <
    Note that every option is (re)evaluated whenever it is required, so
    changing an option during a session is supported.
 
 =======================================================================
 
-6. Functions                                          *vimya-functions*
+6. Functions                                        *nukevim-functions*
 
-   The Vimya plugin defines the following Python functions for public
-   use:
+   The nuke.vim plugin defines the following Python functions for 
+   public use:
 
-     |vimyaRun()|                                     |vimyaRun|
-     |vimyaSend()|                                    |vimyaSend|
-     |vimyaOpenLog()|                                 |vimyaOpenLog|
-     |vimyaRefreshLog()|                              |vimyaRefreshLog|
-     |vimyaResetLog()|                                |vimyaResetLog|
-
-   *sendBufferToMaya* (...)                        *sendBufferToMaya()*
-
-     Since Vimya version 0.5, the function sendBufferToMaya() is an
-     alias for the |vimyaRun()| function (see below), for backwards
-     compatibility. Its parameters and behaviour are exactly the same
-     as for |vimyaRun()|.
+     |NukevimRun()|                                     |nukevimRun|
+     |NukevimBuffer()|                                  |nukevimBuffer|
 
    *vimyaRun* (forceBuffer = False, userCmd = None)        *vimyaRun()*
 
@@ -318,81 +215,6 @@
      The function |vimyaSend()| is used to send all required commands,
      please see there for details on the connection settings.
 
-   *vimyaSend* (commands)                                 *vimyaSend()*
-
-     This function will open a connection to Maya's command port and
-     send the specified commands. The commands parameter must be a list
-     of one or more strings. A newline will be appended to all commands
-     before they are sent. Commands will be sent in the order they
-     appear in the list.
-
-     The options |g:vimyaHost|, |g:vimyaPort|, |g:vimyaSocket| and
-     |g:vimyaTimeout| specify the parameters of the connection. Please
-     see their respective documentation for details.
-
-     An error message will be displayed if something goes wrong. After
-     an error, no attempt will be made to send any more commands from
-     the list.
-
-     Note: This function sends all specified commands as they are
-     (with the exception of the added newline). The |'filetype'| is
-     ignored, no temporary files are created, and this function will
-     not open any log file.
-
-   *vimyaOpenLog* ()                                   *vimyaOpenLog()*
-
-     This function will open the currently used log file, using the
-     configured 'Tail Bundle' command, unless this is disabled.
-
-     The options |g:vimyaShowLog|, |g:vimyaTailCommand| and
-     |g:vimyaSplitBelow| may be used to change the behaviour.
-
-     If no log file is set, or the file is already opened in a window,
-     this function does nothing. If |g:vimyaTailCommand| is not set to
-     'TabTail', any preview window currently opened in the active tab
-     will be closed.
-
-   *vimyaRefreshLog* ()                             *vimyaRefreshLog()*
-
-     This function will update the log file if it is currently opened
-     in a preview window. If the window of the log file is not located
-     in the current tab, it will switch to the window's tab.
-
-     If the log file's window is a regular window, no attempt to
-     refresh it will be made (the tab will be switched if required,
-     though). Does nothing if no log file is currently set. If a log
-     file is set, but not opened in any window, an error message will
-     be printed.
-
-   *vimyaResetLog* ()                                 *vimyaResetLog()*
-
-     This function will create a new temporary file and instruct Maya
-     to use it as its log file.
-
-     If a log file is already set, the command to close all (!) log
-     files:
->
-       cmdFileOutput -ca
-<
-     will be sent to Maya first, then the new file is set.
-
-     The log file will be opened in Vim if enabled, see
-     |vimyaOpenLog()| for details.
-
-     If |g:vimyaShowLog| is not enabled (or the 'Tail Bundle' plugin is
-     not available), no new log file will be created (if a log file is
-     set, it will still be closed, though).
-
-   Note that help for all these functions can also be accessed the
-   Python way by running:
->
-     :py help (<function>)
-<
-   It is suggested that you map the functions you need to keyboard
-   shortcuts, the default |vimya-mappings| are described below. There
-   are also some Ex commands available to call some of the functions,
-   see |vimya-commands|.
-
 =======================================================================
 
 7. Key Mappings                                        *vimya-mappings*
@@ -400,8 +222,8 @@
    The Vimya plugin will create the following mappings unless you
    configure your own mappings:
 >
-     nnoremap <leader>sm :py vimyaRun ()<cr>
-     vnoremap <leader>sm :py vimyaRun ()<cr>
+     nnoremap <leader>sn :py vimyaRun ()<cr>
+     vnoremap <leader>sn :py vimyaRun ()<cr>
      nnoremap <leader>sb :py vimyaRun (forceBuffer = True)<cr>
      vnoremap <leader>sb :py vimyaRun (forceBuffer = True)<cr>
 <
@@ -502,55 +324,6 @@
 >
      vimya /at/ subtype /dot/ de
 <
-
 =======================================================================
 
-10. Changelog                                         *vimya-changelog*
-
-   2014/05/22   * rewrite of most of the plugin's code and most of the
-                  documentation
-                * added options g:vimyaSocket, g:vimyaTimeout,
-                  g:vimyaForceRefresh, g:vimyaRefreshWait and
-                  g:vimyaSplitBelow
-                * added support for Unix domain sockets
-                * renamed sendBufferToMaya() to vimyaRun() (the former
-                  is still available for backwards compatibility)
-                * added public functions vimyaSend(), vimyaOpenLog(),
-                  vimyaRefreshLog() and vimyaResetLog()
-                * added docstrings to all Python functions
-                * added Ex commands :VimyaRun, :VimyaBuffer, :VimyaSend
-                  and :VimyaCommand
-                * fixed some issues that could probably cause the log
-                  features not to work properly for certain file names
-                * changed version number to 0.5
-                * thanks to Talha Ahmed for suggestions and testing
-   2014/02/11   * added the vimyaTempDir and vimyaTailCommand options,
-                  thanks to Claude Ronin
-                * minor updates to the documentation
-                * changed version number to 0.4
-   2013/01/29   * added userCmd parameter to sendBufferToMaya(), thanks
-                  to Gary Fixler for the patch
-                * changed version number to 0.3
-   2009/12/27   * bug fixed: backslash characters in paths are now
-                  replaced by slashes, should now work on Windows
-                * temporary file deletion should be more reliable now
-   2009/05/06   * first public version
-
-=======================================================================
-
-11. License                                             *vimya-license*
-
-Copyright 2009, 2013-2014 Stefan Goebel.
-
-This program is free software: you can redistribute it and/or modify it
-under the terms of the GNU General Public License as published by the
-Free Software Foundation, either version 3 of the License, or (at your
-option) any later version.
-
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program. If not, see <http://www.gnu.org/licenses/>.
+ vim:tw=78:sw=4:ft=help:norl:

@@ -140,6 +140,14 @@ def start(host=socket.gethostname(), port=50777):
     server = serverThread(SERVERNAME, host, port)
     server.start()
 
+def stop():
+    nuke.tprint("nukevim server: halting server")
+    for t in threading.enumerate():
+        if t.getName() == SERVERNAME:
+            t.stop()
 
+def restart():
+    stop()
+    start()
 
 

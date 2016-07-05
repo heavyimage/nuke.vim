@@ -87,5 +87,9 @@ class serverThread(threading.Thread):
 
 def start(host=socket.gethostname(), port=50777):
     nuke.tprint('starting commandPort on %s:%s' % (host, port))
-    t = serverThread('commandPort', host, port)
-    t.start()
+    server = serverThread('commandPort', host, port)
+    server.start()
+
+
+
+

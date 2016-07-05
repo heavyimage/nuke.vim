@@ -15,6 +15,8 @@ import threading
 import StringIO
 import nuke
 
+SERVERNAME = "nukevim_server"
+
 class Server():
 
     def __init__(self, host, port, stopEvent):
@@ -134,8 +136,8 @@ class serverThread(threading.Thread):
         self._stopEvent.set()
 
 def start(host=socket.gethostname(), port=50777):
-    nuke.tprint('nukevim server: listening on %s:%s' % (host, port))
-    server = serverThread('commandPort', host, port)
+    nuke.tprint("nukevim server: listening on %s:%s" % (host, port))
+    server = serverThread(SERVERNAME, host, port)
     server.start()
 
 

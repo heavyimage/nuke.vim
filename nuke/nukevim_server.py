@@ -8,10 +8,12 @@
 #  To Public License, Version 2, as published by Sam Hocevar. See
 #  http://sam.zoy.org/wtfpl/COPYING for more details.
 ##
-
+import sys
 import socket
 import select
+import traceback
 import threading
+import StringIO
 import nuke
 import nukescripts
 
@@ -42,8 +44,56 @@ class Server():
 
         if not self.s:
             raise RuntimeError('Unable to initialise server: %s' % msg)
-    def start(self):
 
+    def _execfile(self, vimnuke_tempfile):
+        """ Borrowed from here: pythonextensions/site-packages/foundry/ui/scripteditor/__init__.py """
+
+        import __main__
+
+        # Read the contents of the file
+        f = open(vimnuke_tempfile)
+        lines = f.readlines()
+        f.close()
+        text = "".join(lines)
+
+        #Compile
+        result = None
+        runError = False
+
+        try:
+            if len(lines) == 1:
+                mode = 'single'
+            else:
+                mode = 'exec'
+            print "going with %s" % mode
+            code_obj = compile(text, '<string>', mode)
+            compiled = True
+        except Exception as e:
+            result = traceback.format_exc()
+            runError = True
+            compiled = False
+
+        oldStdOut = sys.stdout
+        if compiled:
+            #Override stdout to capture exec results
+            buffer = StringIO.StringIO()
+            sys.stdout = buffer
+            try:
+                # Ian Thompson is a golden god
+                exec code_obj in __main__.__dict__
+            except Exception as e:
+                runError = True
+                result = traceback.format_exc()
+            else:
+                result = buffer.getvalue()
+        sys.stdout = oldStdOut
+
+        print ("Code from nuke.vim: \n%s# Result: \n"
+               "%s\n" % (text, result))
+        
+        return result
+    
+    def start(self):
         done = False
         while not done and not self._stopEvent.isSet():
 

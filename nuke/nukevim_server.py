@@ -10,12 +10,10 @@
 ##
 import sys
 import socket
-import select
 import traceback
 import threading
 import StringIO
 import nuke
-import nukescripts
 
 class Server():
 
@@ -93,27 +91,28 @@ class Server():
         
         return result
     
+
+
     def start(self):
-        done = False
-        while not done and not self._stopEvent.isSet():
+        while 1:
+            client, address = self.s.accept()
+            try:
+                tempfile_path = client.recv(4096)
+                if tempfile_path:
+                    print "tempfile_path: %s" % tempfile_path
 
-            inr, outr, exr = select.select([self.s], [], [], 1.0)
+                    result = nuke.executeInMainThreadWithResult(
+                        self._execfile, args=(tempfile_path))
 
-            for s in inr:
-                if s == self.s:
-                    (conn, addr) = self.s.accept()
-                    nuke.tprint('Connection from %s', addr)
+                    print "sending result: '%s'" % result
 
-                    data = conn.recv(1024)
+                    client.send(result or "<no output>")
 
-                    if data == 'shutdown':
-                        done = True
-                    else:
-                        nukescripts.utils.executeInMainThread(nuke.load, (data,))
-
-                    conn.close()
-
-        nuke.tprint('commandPort shutdown')
+            except SystemExit:
+                client.send('SERVER: Shutting down...')
+                raise
+            finally:
+                client.close()
 
 class serverThread(threading.Thread):
 

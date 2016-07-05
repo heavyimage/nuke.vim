@@ -46,7 +46,6 @@ endfunction
 
 call NukevimSetConfig( 'Host',             'localhost' )
 call NukevimSetConfig( 'Port',             50777         )
-call NukevimSetConfig( 'Socket',           ''            )
 call NukevimSetConfig( 'TempDir',          ''            )
 call NukevimSetConfig( 'Timeout',          5.0           )
 
@@ -205,16 +204,13 @@ def nukevimSend(instructions_path):
     Returns any output recieved.
     """
 
-    socketPath =      vim.eval('g:nukevimSocket' )
     timeout    =      vim.eval('g:nukevimTimeout')
     host       =      vim.eval('g:nukevimHost'   )
     port       =  int(vim.eval('g:nukevimPort'   ))
 
     try:
-        if socketPath != '':
-            connection = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        else:
-            connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
         if timeout == '':
             connection.settimeout(None)
         else:
@@ -224,10 +220,7 @@ def nukevimSend(instructions_path):
         return 0
 
     try:
-        if socketPath != '':
-            connection.connect(socketPath)
-        else:
-            connection.connect((host, port))
+        connection.connect((host, port))
     except socket.error as e:
         __nukevimError('Could not connect to command port: %s' % str(e))
         return 0

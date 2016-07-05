@@ -41,8 +41,7 @@ class Server():
             break
 
         if not self.s:
-            raise RuntimeError, 'Unable to initialise server: %s' % msg
-
+            raise RuntimeError('Unable to initialise server: %s' % msg)
     def start(self):
 
         done = False

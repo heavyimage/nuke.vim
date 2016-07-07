@@ -145,98 +145,56 @@ nukevim.txtFor    Vim version 7.4    Last change: 2016 July 4
    The nuke.vim plugin defines the following Python functions for 
    public use:
 
-     |NukevimRun()|                                     |nukevimRun|
-     |NukevimBuffer()|                                  |nukevimBuffer|
+     |nukevimRun()|                                     |nukevimRun|
 
-   *vimyaRun* (forceBuffer = False, userCmd = None)        *vimyaRun()*
+   *nukevimRun* (forceBuffer = False)                    *nukevimRun()*
 
      If you call this function without any parameters:
 >
-       :py vimyaRun ()
+       :py nukevimRun()
 <
-     the complete current buffer will be executed by Maya. The content
-     will be saved to a temporary file, and Vimya will send commands to
-     Maya's command port to source this file.
-
-     The current buffer's |'filetype'| must be set to either 'python'
-     or 'mel', or not set at all ('none'). If it is not set, the option
-     |g:vimyaDefaultFiletype| is used to determine the correct commands
-     to send. Other file types will cause an error message, no further
-     action will be performed in that case.
+     Some or all of the current buffer will be executed by Nuke. The 
+     content will be saved to a temporary file, and nuke.vim will send 
+     commands to Nuke's socket server to source this file.
 
      In visual mode, only the selected lines will be executed, unless
      you set the forceBuffer parameter to True (it defaults to False):
 >
-       :py vimyaRun (forceBuffer = True)
+       :py nukevimRun (forceBuffer = True)
 <
      In that case the complete buffer will be executed.
 
      Note: If a selection starts or ends in the middle of a line, the
      complete line will be included!
 
-     If you explicitely specify a command with the userCmd parameter:
->
-       :py vimyaRun (userCmd = "<some command>")
-<
-     the buffer content (and visual selection) is ignored, and only
-     this command is executed instead. Obviously, the forceBuffer
-     parameter is also ignored in this case. Note that the comamnd will
-     still be written to a temporary file first, and then this file
-     will be sourced. The current |'filetype'| also determines the type
-     of the command, as described above.
-
-     If the 'Tail Bundle' plugin is installed, the output of Maya will
-     be written to a temporary log file and this file will be opened in
-     a new preview tab (or window, see the |g:vimyaTailCommand| option)
-     in Vim, unless this behaviour is disabled by setting the variable
-     |g:vimyaShowLog| to 0. See |:TabTail| or |:Tail| if installed. See
-     |vimyaResetLog()| and |vimyaOpenLog()| for more details. Also, if
-     enabled, after sending the commands to Maya the log buffer will be
-     refreshed automatically, see the options |g:vimyaForceRefresh| and
-     |g:vimyaRefreshWait| and the |vimyaRefreshLog()| function for more
+     The temporary files containing commands will be deleted when Vim
+     is closed.  Do not delete any of them manually before you close
+     Vim. The location of the temporary files depends on your system,
+     unless the option |g:nukevimTempDir| is set to override the 
+     default.  See the Python documentation on tempfile.mkstemp() for 
      details.
 
-     All temporary files will be deleted automatically. The files
-     sourced by Maya will be deleted by Maya itself: after the command
-     to source the file the
->
-       sysFile -delete <temporary file>
-<
-     MEL command is sent. The temporary logfiles will be deleted when
-     Vim is closed, do not delete any of them manually before you close
-     Vim. The location of the temporary files depends on your system,
-     unless the option |g:vimyaTempDir| is set to override the default.
-     See the Python documentation on tempfile.mkstemp() for details.
-
-     Note: Since version 0.2 the plugin keeps track of all temporary
-     files and tries to delete them when leaving Vim, since deleting
-     with Maya's own commands did not always work reliably.
-
-     The function |vimyaSend()| is used to send all required commands,
-     please see there for details on the connection settings.
+     The function |nukevimSend()| is used to send all required 
+     commands, please see there for details on the connection settings.
 
 =======================================================================
 
-7. Key Mappings                                        *vimya-mappings*
+7. Key Mappings                                      *nukevim-mappings*
 
-   The Vimya plugin will create the following mappings unless you
-   configure your own mappings:
+   The nuke.vim plugin will create the following mappings unless you
+   configure your own:
 >
-     nnoremap <leader>sn :py vimyaRun ()<cr>
-     vnoremap <leader>sn :py vimyaRun ()<cr>
-     nnoremap <leader>sb :py vimyaRun (forceBuffer = True)<cr>
-     vnoremap <leader>sb :py vimyaRun (forceBuffer = True)<cr>
+     nnoremap <leader>sn :py nukevimRun()<cr>
+     vnoremap <leader>sn :py nukevimRun()<cr>
+     nnoremap <leader>sb :py nukevimRun(forceBuffer = True)<cr>
+     vnoremap <leader>sb :py nukevimRun(forceBuffer = True)<cr>
 <
-   See |vimya-functions| above for details on these function. The
+   See |nukevim-functions| above for details on these function. The
    mappings are available in normal and visual mode.
 
    Note that if you create any custom mapping that contains either the
 >
-     :py vimyaRun
-<
-   or the
->
-     :py sendBufferToMaya
+     :py nukevimRun
 <
    command the default mappings shown above will not be created!
 
@@ -244,85 +202,39 @@ nukevim.txtFor    Vim version 7.4    Last change: 2016 July 4
 
 =======================================================================
 
-8. Ex Commands                                         *vimya-commands*
+8. Ex Commands                                       *nukevim-commands*
 
-   The following commands are defined by Vimya:
+   The following commands are defined by nuke.vim:
 
-     :VimyaRun                                          |:VimyaRun|
-     :VimyaBuffer                                       |:VimyaBuffer|
-     :VimyaCommand                                      |:VimyaCommand|
-     :VimyaSend                                         |:VimyaSend|
+     :NukevimRun                                      |:NukevimRun|
+     :NukevimBuffer                                   |:NukevimBuffer|
 
-   *:VimyaRun*
+   *:NukevimRun*
 
-     Calls the |vimyaRun()| function without any parameters. The
+     Calls the |nukevimRun()| function without any parameters. The
      command itself does not expect any parameters.
 
-   *:VimyaBuffer*
+   *:NukevimBuffer*
 
-     Calls the |vimyaRun()| function with the forceBuffer parameter set
-     to True. The command itself does not expect any parameters.
-
-   *:VimyaCommand* <parameters>
-
-     Calls the |vimyaRun()| function with the userCmd parameter set to
-     the parameters of the command.
-
-     Parameters must not be quoted as a whole, Vim will do that.
-     However, individual parameters of the command to be sent must be
-     quoted as required by MEL or Python! All parameters will be
-     concatenated to one single string.
-
-     For example (assuming Python is used for commands):
->
-       :VimyaCommand print "a" + "b"
-<
-     will result in the function call
->
-       vimyaRun (userCmd = "print \"a\" + \"b\"")
-<
-     and this will eventually print the string "ab" in Maya's script
-     output. Also see |vimyaRun()| for more details.
-
-   *:VimyaSend* <parameters>
-
-     Works like |:VimyaCommand|, but instead of using |vimyaRun()| the
-     command will be sent using the |vimyaSend()| function.
-
-     Please see the notes on parameter quoting and the example for
-     |:VimyaCommand|. These notes also apply to :VimyaSend.
-
-     The string built from the command's parameters will be the one
-     (and only) element of |vimyaSend|'s commands parameter.
-
-     For example (again, assuming Python is used for commands):
->
-       :VimyaSend print "a" + "b"
-<
-     will result in the function call
->
-       vimyaSend (["print \"a\" + \"b\""])
-<
-   Commands for the other available functions are not defined, but you
-   can easily do this in you |.vimrc| file if required.
+     Calls the |nukevimRun()| function with the forceBuffer parameter 
+     set to True. The command itself does not expect any parameters.
 
 =======================================================================
 
-9. Additional Information                                  *vimya-info*
+9. Additional Information                                *nukevim-info*
 
-   See Vimya's page in the scripts section of the official Vim homepage
-   for more information, including links to the bug tracker etc.:
+   See nuke.vim's page on github for more information, including links 
+   to the bug tracker etc:
+
 >
-     http://www.vim.org/scripts/script.php?script_id=2626
+     https://github.com/heavyimage/nuke.vim
 <
-   The Git repository is hosted at Bitbucket:
->
-     https://bitbucket.org/goeb/vimya/
-<
+
    Feel free to contact the author for any questions, suggestions etc.
    regarding this plugin by mail:
+
 >
-     vimya /at/ subtype /dot/ de
+     Jesse.Spielman@gmail.com
 <
 =======================================================================
 

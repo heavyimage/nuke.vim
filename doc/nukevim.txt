@@ -109,7 +109,7 @@ nukevim.txtFor    Vim version 7.4    Last change: 2016 July 4
 
    *g:nukevimPort*                                        *nukevimPort*
 
-     Default: 50777
+     Default: 10191
 
      The port number Nuke is listening on for connections.
 

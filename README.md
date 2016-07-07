@@ -31,7 +31,7 @@ An integration package for the Foundry's [Nuke](https://www.thefoundry.co.uk/pro
 * Modify your ~/.vimrc to set up some global variables for nuke.vim
 ``` vimscript
     let 'g:nukevimHost'     = '<hostname>'  # 'localhost' might just work but I had problems with that on macOS so just use the output of `hostname`
-    let 'g:nukevimPort'     = 50777         # The port for the connections
+    let 'g:nukevimPort'     = 10191         # The port for the connections
     let 'g:nukevimTempDir'  = ''            # If you want to specify a tempdir for the instruction files
     let 'g:nukevimTimeout'  = 5.0           # A timeout in seconds for the socket connection
 ```

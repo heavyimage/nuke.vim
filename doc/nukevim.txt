@@ -27,6 +27,10 @@ nukevim.txtFor    Vim version 7.4    Last change: 2016 July 4
    easy to add!) in a temporary file and tells Nuke via a socket 
    connection to source this file. 
 
+   All output (messages from vim to nuke, and mesages returned from
+   Nuke) are logged in vim -- simply type ':messages' into the vim
+   command line to access the history.
+
 =======================================================================
 
 2. Requirements                                  *nukevim-requirements*

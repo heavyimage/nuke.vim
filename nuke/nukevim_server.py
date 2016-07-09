@@ -1,49 +1,42 @@
-##
-#  Copyright (c)        2012 sydh <sydhds at gmail dot com>
-#                       All Rights Reserved
-#
-#  This program is free software. It comes without any warranty, to
-#  the extent permitted by applicable law. You can redistribute it
-#  and/or modify it under the terms of the Do What The Fuck You Want
-#  To Public License, Version 2, as published by Sam Hocevar. See
-#  http://sam.zoy.org/wtfpl/COPYING for more details.
-##
+""" Inspired by https://pymotw.com/2/SocketServer/ """
+
 import sys
+import SocketServer
 import socket
-import traceback
+import time
 import threading
-import StringIO
+import traceback
 import nuke
+import StringIO
 
-SERVERNAME = "nukevim_server"
+class NukeVimRequestHandler(SocketServer.BaseRequestHandler):
 
-class Server():
+    def __init__(self, request, client_address, server):
+        SocketServer.BaseRequestHandler.__init__(self, request, client_address, server)
 
-    def __init__(self, host, port, stopEvent):
+    def handle(self):
+        tempfile_path = self.request.recv(4096)
 
-        self._stopEvent = stopEvent
+        if tempfile_path:
 
-        for res in socket.getaddrinfo(host, port, socket.AF_UNSPEC, socket.SOCK_STREAM, 0, socket.AI_PASSIVE):
-            af, socktype, proto, canonname, sa = res
+            result = nuke.executeInMainThreadWithResult(
+                self._execfile, args=(tempfile_path))
 
-            try:
-                self.s = socket.socket(af, socktype, proto)
-            except socket.error, msg:
-                self.s = None
-                continue
+            if result is not None:
+                result = result.strip()
 
-            try:
-                self.s.bind(sa)
-                self.s.listen(1)
-            except socket.error, msg:
-                self.s.close()
-                self.s = None
-                continue
+                # Not empty...
+                if len(result):
+                    self.request.send(result)
 
-            break
+            else:
+                self.request.send("<No Output>")
 
-        if not self.s:
-            raise RuntimeError('Unable to initialise server: %s' % msg)
+        # notify the client that nothing was recieved
+        else:
+            self.request.send("recieved nothing!")
+
+        return
 
     def _execfile(self, vimnuke_tempfile):
         """ Borrowed from here: pythonextensions/site-packages/foundry/ui/scripteditor/__init__.py """
@@ -95,59 +88,60 @@ class Server():
 
 
 
-    def start(self):
-        while 1:
-            client, address = self.s.accept()
-            try:
-                tempfile_path = client.recv(4096)
-                if tempfile_path:
-                    print "tempfile_path: %s" % tempfile_path
 
-                    result = nuke.executeInMainThreadWithResult(
-                        self._execfile, args=(tempfile_path))
+class NukeVimServer(SocketServer.TCPServer):
 
-                    print "sending result: '%s'" % result
+    def __init__(self, server_address, handler_class=NukeVimRequestHandler):
+        self.address = server_address
+        SocketServer.TCPServer.__init__(self, server_address, handler_class)
+        self.stop_now = False
 
-                    client.send(result or "<no output>")
+    def halt_now(self):
+        """ A function to signal the server to stop and shut down.  Sets
+        the stop_now variable which breaks out out of the while loop in
+        serve_forever """
+        self.stop_now = True
 
-            except SystemExit:
-                client.send('SERVER: Shutting down...')
-                raise
-            finally:
-                client.close()
+        # We seriously also have to make a fake connection to really stop
+        # the server from running!
+        connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        connection.connect(self.address)
 
-class serverThread(threading.Thread):
+    def serve_forever(self):
+        """ The core execution loop for the server """
+        while not self.stop_now:
+            self.handle_request()
 
-    def __init__(self, name, host, port):
+        # If you're here, stop_now has been set to true by halt_now.  Close
+        # the socket but....
+        self.socket.close()
 
-        threading.Thread.__init__(self, name=name)
-        self._stopEvent = threading.Event()
-        self.host = host
-        self.port = port
-        self.name = name
-        # prevent Nuke hang at exit
-        self.daemon = True
+        print "Server Halted."
+        return
 
-    def run(self):
-        s = Server(self.host, self.port, self._stopEvent)
-        s.start()
+def start():
+    """ The function which starts up the nuke.vim communication server """
+    address = (socket.gethostname(), 10191)
 
-    def stop(self):
-        self._stopEvent.set()
+    print "nukevim server: listening on %s:%s" % (address[0], address[1])
+    global server
+    server = NukeVimServer(address)
+    server.allow_reuse_address = True
 
-def start(host=socket.gethostname(), port=50777):
-    nuke.tprint("nukevim server: listening on %s:%s" % (host, port))
-    server = serverThread(SERVERNAME, host, port)
-    server.start()
+    t = threading.Thread(target=server.serve_forever)
+    t.setDaemon(True) # don't hang on exit
+    t.start()
 
 def stop():
-    nuke.tprint("nukevim server: halting server")
-    for t in threading.enumerate():
-        if t.getName() == SERVERNAME:
-            t.stop()
+    """ The function which stops the nuke.vim communication server """
+    msg = "nukevim server: halting theaded server..."
+    nuke.tprint(msg)
+    print msg
+    server.halt_now()
 
 def restart():
+    """ A helper function used for debugging purposes """
     stop()
+    time.sleep(3)
     start()
-
 

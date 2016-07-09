@@ -39,9 +39,9 @@ class NukeVimRequestHandler(SocketServer.BaseRequestHandler):
         return
 
     def _execfile(self, vimnuke_tempfile):
-        """ Borrowed from here: pythonextensions/site-packages/foundry/ui/scripteditor/__init__.py """
-
-        import __main__
+        """ Borrowed some ideas from here:
+            pythonextensions/site-packages/foundry/ui/scripteditor/__init__.py
+        """
 
         # Read the contents of the file
         f = open(vimnuke_tempfile)
@@ -49,44 +49,45 @@ class NukeVimRequestHandler(SocketServer.BaseRequestHandler):
         f.close()
         text = "".join(lines)
 
-        #Compile
-        result = None
-        runError = False
+        # prep the python commands and print em
+        text = "".join(lines)
+        print "# recieved from nuke.vim: %s"
+        print text.strip()
 
         try:
             if len(lines) == 1:
                 mode = 'single'
             else:
                 mode = 'exec'
-            print "going with %s" % mode
-            code_obj = compile(text, '<string>', mode)
-            compiled = True
+
+            code_obj = compile(text, vimnuke_tempfile, mode)
+        except Exception as e:
+            # If the code doesn't compile, no reason to try to exec it below!
+            result = traceback.format_exc()
+            print "# Result: %s\n" % result
+            return result
+
+        #Capture exec results
+        oldStdOut = sys.stdout
+        str_buffer = StringIO.StringIO()
+        sys.stdout = str_buffer
+        try:
+            # Ian Thompson is a golden god
+            import __main__
+            exec code_obj in __main__.__dict__
         except Exception as e:
             result = traceback.format_exc()
-            runError = True
-            compiled = False
 
-        oldStdOut = sys.stdout
-        if compiled:
-            #Override stdout to capture exec results
-            buffer = StringIO.StringIO()
-            sys.stdout = buffer
-            try:
-                # Ian Thompson is a golden god
-                exec code_obj in __main__.__dict__
-            except Exception as e:
-                runError = True
-                result = traceback.format_exc()
-            else:
-                result = buffer.getvalue()
-        sys.stdout = oldStdOut
+        else:
+            result = str_buffer.getvalue()
 
-        print ("Code from nuke.vim: \n%s# Result: \n"
-               "%s\n" % (text, result))
+        finally:
+            sys.stdout = oldStdOut
 
-        return result
+            # Print results
+            print "# Result: %s\n" % result
 
-
+            return result
 
 
 class NukeVimServer(SocketServer.TCPServer):

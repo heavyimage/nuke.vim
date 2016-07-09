@@ -204,17 +204,13 @@ def nukevimSend(instructions_path):
     Returns any output recieved.
     """
 
-    timeout    =      vim.eval('g:nukevimTimeout')
     host       =      vim.eval('g:nukevimHost'   )
     port       =  int(vim.eval('g:nukevimPort'   ))
 
     try:
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        if timeout == '':
-            connection.settimeout(None)
-        else:
-            connection.settimeout(float(timeout))
+        connection.settimeout(None)
     except socket.error as e:
         __nukevimError('Could not initialize the socket: %s' % str(e))
         return 0

@@ -216,6 +216,7 @@ def nukevimSend(instructions_path):
         return 0
 
     try:
+        __nukevimMsg("Trying to connect to %s:%s" % (host, port))
         connection.connect((host, port))
     except socket.error as e:
         __nukevimError('Could not connect to command port: %s' % str(e))

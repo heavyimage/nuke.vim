@@ -227,9 +227,7 @@ def nukevimSend(instructions_path):
             __nukevimMsg("Sending %s" % instructions_path)
             connection.send(instructions_path)
 
-            data = connection.recv(4096)
-            # TODO: replacement of null terminators not working...
-            return data.replace('\0', '\n')
+            return connection.recv(4096)
 
         except socket.error as e:
             __nukevimError('Sending a command failed: %s' % str(e))
@@ -284,7 +282,9 @@ def nukevimRun(forceBuffer = False):
 
     response = nukevimSend(escaped_path)
     if response:
-        __nukevimMsg("Recieved from nuke: '%s'" % response)
+        # Print the results
+        for line in response.split("\n"):
+            __nukevimMsg(line)
         return True
     else:
         return False

@@ -1,4 +1,34 @@
-""" Inspired by https://pymotw.com/2/SocketServer/ """
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# vim.nuke -- an integration packge for vim and The Foundry's Nuke
+# Copyright (C) 2016 Jesse Spielman
+#
+# This file is part of nuke.vim.
+#
+# nuke.vim is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# nuke.vim is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with nuke.vim.  If not, see <http://www.gnu.org/licenses/>.
+
+""" This module is for the code that runs inside of nuke / nukestudio / hiero
+and allows communciation with vim.
+
+Integration ideas inspired by Stefan Göbel's vimya and sydh's vimnuke
+
+Netcode inspired by https://pymotw.com/2/SocketServer/
+
+Special thanks to Ian Thompson for the snipit which allows execing into the
+script editor's context directly.
+"""
 
 import sys
 import SocketServer

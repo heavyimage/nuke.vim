@@ -1,33 +1,20 @@
-"""
+" vim.nuke -- an integration packge for vim and The Foundry's Nuke
+" Copyright (C) 2016 Jesse Spielman
 "
-" Coypright 2009, 2013-2014 Stefan Goebel - <vimya /at/ subtype /dot/ de>.
+" This file is part of nuke.vim.
 "
-" This program is free software: you can redistribute it and/or modify it under the terms of the
-" GNU General Public License as published by the Free Software Foundation, either version 3 of the
-" License, or (at your option) any later version.
+" nuke.vim is free software: you can redistribute it and/or modify
+" it under the terms of the GNU General Public License as published by
+" the Free Software Foundation, either version 3 of the License, or
+" (at your option) any later version.
 "
-" This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-" even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-" General Public License for more details.
+" nuke.vim is distributed in the hope that it will be useful,
+" but WITHOUT ANY WARRANTY; without even the implied warranty of
+" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+" GNU General Public License for more details.
 "
-" You should have received a copy of the GNU General Public License along with this program. If
-" not, see <http://www.gnu.org/licenses/>.
-"
-"""
-
-"""
-"
-" Vimya 0.5 - Execute buffer contents as MEL or Python scripts in Autodesk Maya.
-"
-" Help is available in doc/nukevim.txt or from within Vim:
-"
-"   :help vimya
-"
-" Help for all the Python functions can also be accessed in Vim the Python way:
-"
-"   :py help (<function>)
-"
-"""
+" You should have received a copy of the GNU General Public License
+" along with nuke.vim.  If not, see <http://www.gnu.org/licenses/>.
 
 if exists('g:nukevimLoaded') || &compatible || ! has('python')
     finish

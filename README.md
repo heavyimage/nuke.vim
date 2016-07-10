@@ -1,10 +1,11 @@
 # nuke.vim
 An integration package for the Foundry's [Nuke](https://www.thefoundry.co.uk/products/nuke/).  This is my first vim plugin so go easy on me!
 
-![Screenshot of nuke.vim](https://github.com/heavyimage/nuke.vim/blob/master/doc/screenshot.png "Screenshot of nuke.vim")
 # What works now
 * Syntax highlighting / a simple ftdetect plugin for .nk/.gizmo files!
+![Screenshot 1 of nuke.vim](https://github.com/heavyimage/nuke.vim/blob/master/doc/syntax.png "Screenshot of syntax hilighting")
 * Use vim as a replacement for the builtin nuke (Nuke Studio / Hiero) script editor(s)
+![Screenshot 2 of nuke.vim](https://github.com/heavyimage/nuke.vim/blob/master/doc/scriptediting.png "Screenshot of using vim as a replacement for the script editor")
 
 # Coming soon
 * Improvements to vim-as-script-editor (see TODO)

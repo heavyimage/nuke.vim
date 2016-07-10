@@ -1,3 +1,6 @@
+# TODO --- general
+* Make a video to show this functionality off
+
 # TODO --- nuke.vim scripteditor replacement
 * load output in quickfix window
 * Option to send commmands directly without need for a tempfile

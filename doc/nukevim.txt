@@ -107,7 +107,7 @@ nukevim.txtFor    Vim version 7.4    Last change: 2016 July 4
 
    *g:nukevimHost*                                        *nukevimHost*
 
-     Default: 'localhost'
+     Default: '127.0.0.1'
 
      String that specifies the address of the host.
 

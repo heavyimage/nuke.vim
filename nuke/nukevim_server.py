@@ -173,7 +173,7 @@ NUKEVIM_SERVER = None
 
 def start():
     """ The function which starts up the nuke.vim communication server """
-    address = (socket.gethostname(), 10191)
+    address = ('127.0.0.1', 10191)
 
     print "nuke.vim server: listening on %s:%s" % (address[0], address[1])
     try:

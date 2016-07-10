@@ -56,18 +56,18 @@ An integration package for the Foundry's [Nuke](https://www.thefoundry.co.uk/pro
 
 Startup vim, and fill the buffer with a few python snippits
 
-    ```python
-        nuke.createNode("Blur")
+```python
+    nuke.createNode("Blur")
 
-        10+50
+    10+50
 
-        import math
-        for i in range(360):
-            x = int(math.cos(math.radians(i))) * 500
-            y = int(math.sin(math.radians(i))) * 500
-            d = nuke.createNode("Dot")
-            d.setXYpos(x, y)
-    ```
+    import math
+    for i in range(360):
+        x = int(math.cos(math.radians(i))) * 500
+        y = int(math.sin(math.radians(i))) * 500
+        d = nuke.createNode("Dot")
+        d.setXYpos(x, y)
+```
 
 Then, consider the chart below:
 

@@ -1,18 +1,13 @@
 # nuke.vim
 An integration package for the Foundry's [Nuke](https://www.thefoundry.co.uk/products/nuke/).  This is my first vim plugin so go easy on me!
 
-# What works now
+# Included functionality
 * Syntax highlighting / a simple ftdetect plugin for .nk/.gizmo files!
 ![Screenshot 1 of nuke.vim](https://github.com/heavyimage/nuke.vim/blob/master/doc/syntax.png "Screenshot of syntax hilighting")
 * Use vim as a replacement for the builtin nuke (Nuke Studio / Hiero) script editor(s)
 ![Screenshot 2 of nuke.vim](https://github.com/heavyimage/nuke.vim/blob/master/doc/scriptediting.png "Screenshot of using vim as a replacement for the script editor")
+* See 'coming soon' (below) for more ideas I have for this package
 
-# Coming soon
-* Improvements to vim-as-script-editor (see TODO)
-* Nuke function python code completion in vim
-* A terminal based node viewer
-* Broaden into vfx.vim with setups for other apps?!
-* Other cool ideas you send to me
 
 # Requirements
 * A copy of vim compiled with python support (check vim --version; if you don't have support, try installing an enhanced or "huge" verison of vim with more flags enabled)
@@ -87,3 +82,9 @@ You should be iterating in no time!  For more information, consult doc/nukevim.t
 * Toke Jepsen's [atom-foundry-nuke](https://github.com/tokejepsen/atom-foundry-nuke) for Atom
 * [Ian Thompson](https://github.com/quornian) for providing a crucial bit of help
 
+# Coming soon
+* Improvements to vim-as-script-editor (see TODO)
+* Nuke function python code completion in vim
+* A terminal based node viewer
+* Broaden into vfx.vim with setups for other apps?!
+* Other cool ideas you send to me

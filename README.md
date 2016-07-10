@@ -8,6 +8,12 @@ An integration package for the Foundry's [Nuke](https://www.thefoundry.co.uk/pro
 ![Screenshot 2 of nuke.vim](https://github.com/heavyimage/nuke.vim/blob/master/doc/scriptediting.png "Screenshot of using vim as a replacement for the script editor")
 * See 'coming soon' (below) for more ideas I have for this package
 
+# Motivation
+* Faster iteration in nuke; vim movement / edit commands are much faster than nuke's script editor
+* Learn more about vim plugin development / scripting
+* Similar tools (see acknowledgement) failed to execute nuke code in the same context as the script editor meaning that you couldn't move back and forth between vim and the built in editor
+* Similar tools don't seem to send the output back to vim to make debugging and iteration even faster
+* It's a rediculous idea that no one but me will actually use
 
 # Requirements
 * A copy of vim compiled with python support (check vim --version; if you don't have support, try installing an enhanced or "huge" verison of vim with more flags enabled)

@@ -17,10 +17,16 @@ class NukeVimRequestHandler(SocketServer.BaseRequestHandler):
     def handle(self):
         tempfile_path = self.request.recv(4096)
 
-        if tempfile_path:
-
+        # Multiplex by app
+        if self.server.app == "hiero":
+            import hiero
+            result = hiero.core.executeInMainThreadWithResult(
+                self._hiero_execfile_wrapper, args=(tempfile_path))
+        elif self.server.app == "nuke":
             result = nuke.executeInMainThreadWithResult(
                 self._execfile, args=(tempfile_path))
+        else:
+            raise RuntimeError("Unknown App")
 
             if result is not None:
                 result = result.strip()
@@ -37,6 +43,12 @@ class NukeVimRequestHandler(SocketServer.BaseRequestHandler):
             self.request.send("recieved nothing!")
 
         return
+
+    def _hiero_execfile_wrapper(self, **kwargs):
+        """ Naturally hiero's executeInMainThreadWithResults sends it's args
+        in as kwargs -- so use this wrapper for hiero to extract the tempfile
+        path and pass it along to _execfile """
+        return self._execfile(kwargs['args'])
 
     def _execfile(self, vimnuke_tempfile):
         """ Borrowed some ideas from here:
@@ -96,6 +108,12 @@ class NukeVimServer(SocketServer.TCPServer):
         self.address = server_address
         SocketServer.TCPServer.__init__(self, server_address, handler_class)
         self.stop_now = False
+
+        # Switch on nuke.env to hook up the proper hiero function and cache here
+        if nuke.env['hiero']:
+            self.app = "hiero"
+        else:
+            self.app = "nuke"
 
     def halt_now(self):
         """ A function to signal the server to stop and shut down.  Sets

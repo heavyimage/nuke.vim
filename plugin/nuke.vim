@@ -227,7 +227,8 @@ def nukevimSend(instructions_path):
             __nukevimMsg("Sending %s" % instructions_path)
             connection.send(instructions_path)
 
-            return connection.recv(4096)
+            # limit reply to 16K
+            return connection.recv(16384)
 
         except socket.error as e:
             __nukevimError('Sending a command failed: %s' % str(e))

@@ -93,9 +93,9 @@ def __nukevimRemoveTempFiles():
 
     __nukevimRemoveTempFiles() : None
 
-    This function will be called automatically when leaving Vim. It will try to delete all the
-    temporary files created during the session. There is no error handling, if deleting a file
-    fails, the file will be left on disk.
+    This function will be called automatically when leaving Vim. It will try to 
+    delete all the temporary files created during the session. There is no error
+    handling, if deleting a file fails, the file will be left on disk.
 
     This function does not return anything.
     """
@@ -130,13 +130,14 @@ def __nukevimError(message):
 
     __nukevimError(message) : False
 
-    This function will print the error message in Vim's message area, using the appropriate
-    error highlighting.
+    This function will print the error message in Vim's message area, using the
+    appropriate error highlighting.
 
     It will always return False.
     """
 
-    vim.command('echohl ErrorMsg | echo "%s" | echohl None' % __nukevimEscape(message, '\\"'))
+    vim.command('echohl ErrorMsg | echo "%s" | echohl None' % (
+            __nukevimEscape(message, '\\"')))
 
     return False
 
@@ -146,9 +147,10 @@ def __nukevimEscape(string, characters):
 
     __nukevimEscape(string, characters) : str
 
-    Works like Vim's escape() function. Every occurrence of one of the characters in the characters
-    parameter inside the string will be replaced by '\' + character. The backslash itself has to be
-    included as the first character in the characters parameter if it also should be escaped!
+    Works like Vim's escape() function. Every occurrence of one of the
+    characters in the characters parameter inside the string will be replaced
+    by '\' + character. The backslash itself has to be included as the first
+    character in the characters parameter if it also should be escaped!
 
     Returns the resulting string.
     """
@@ -164,7 +166,8 @@ def __nukevimFilenameEscape(filename):
 
     __nukevimFilenameEscape(string) : str
 
-    This function may be used to apply Vim's fnameescape() function to the supplied parameter.
+    This function may be used to apply Vim's fnameescape() function to the
+    supplied parameter.
 
     Returns the escaped string.
     """
@@ -173,7 +176,8 @@ def __nukevimFilenameEscape(filename):
 
 def __nukevimFixPath(filename):
 
-    """Replace all backslashes in the file name with slashes on Windows platforms.
+    """Replace all backslashes in the file name with slashes on Windows
+    platforms.
 
     __nukevimFixPath(filename) : str
 
@@ -247,8 +251,9 @@ def nukevimRun(forceBuffer = False):
 
     nukevimRun(forcedBuffer = False) : bool
 
-    Saves the current buffer to a temporary file and instructs Nuke to source this file. In visual
-    mode only the selected lines are used (for partially selected lines the complete line will be
+    Saves the current buffer to a temporary file and instructs Nuke to source
+    this file. In visual mode only the selected lines are used (for partially
+    selected lines the complete line will be
     included).
 
     If any output is recieved, it is logged to vim's :messages queue via echom
@@ -268,7 +273,9 @@ def nukevimRun(forceBuffer = False):
     else:
         tempfile.tempdir = None
 
-    (tmpHandle, tmpPath) = tempfile.mkstemp(suffix = '.tmp', prefix = 'nukevim.', text = 1)
+    (tmpHandle, tmpPath) = tempfile.mkstemp(
+            suffix='.tmp', prefix='nukevim.', text=1)
+
     __nukevimTempFiles.append(tmpPath)
 
     try:
@@ -291,3 +298,4 @@ def nukevimRun(forceBuffer = False):
         return True
     else:
         return False
+

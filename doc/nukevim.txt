@@ -18,14 +18,14 @@ nukevim.txtFor    Vim version 7.4    Last change: 2016 July 4
 
 1. Overview                                          *nukevim-overview*
 
-   nuke.vim is plugin for the Vim editor that may be used to execute 
-   the contents of a Vim buffer, or the current |visual-mode| 
+   nuke.vim is plugin for the Vim editor that may be used to execute
+   the contents of a Vim buffer, or the current |visual-mode|
    selection, in The Foundry's Nuke.
 
-   The plugin saves the command(s) to be executed (only python is 
-   supported at this time but if TCL would be useful for anyone it's 
-   easy to add!) in a temporary file and tells Nuke via a socket 
-   connection to source this file. 
+   The plugin saves the command(s) to be executed (only python is
+   supported at this time but if TCL would be useful for anyone it's
+   easy to add!) in a temporary file and tells Nuke via a socket
+   connection to source this file.
 
    All output (messages from vim to nuke, and mesages returned from
    Nuke) are logged in vim -- simply type ':messages' into the vim
@@ -64,8 +64,8 @@ nukevim.txtFor    Vim version 7.4    Last change: 2016 July 4
    with git.
 
    If using a zip archive: Extract the contents and copy the files
-   in the 'doc', 'plugin', 'ftdetect', and 'syntax' subdirectories to 
-   the appropriate folders in your runtime path. Usually this is 
+   in the 'doc', 'plugin', 'ftdetect', and 'syntax' subdirectories to
+   the appropriate folders in your runtime path. Usually this is
    '~/.vim/' (see |'runtimepath'| and |add-global-plugin| for details).
    You may need to create the directories if they do not exist.
 
@@ -74,7 +74,7 @@ nukevim.txtFor    Vim version 7.4    Last change: 2016 July 4
    the Vimball method).
 
    See |nukevim-configuration|, |nukevim-functions|, |nukevim-mappings|
-   and |nukevim-commands| for details on how to setup and use this 
+   and |nukevim-commands| for details on how to setup and use this
    plugin.
 
 =======================================================================
@@ -96,7 +96,7 @@ nukevim.txtFor    Vim version 7.4    Last change: 2016 July 4
 <
 
    Note that there is no authentication, and so opening this server
-   might be a SECURITY RISK! 
+   might be a SECURITY RISK!
 
 =======================================================================
 
@@ -146,7 +146,7 @@ nukevim.txtFor    Vim version 7.4    Last change: 2016 July 4
 
 6. Functions                                        *nukevim-functions*
 
-   The nuke.vim plugin defines the following Python functions for 
+   The nuke.vim plugin defines the following Python functions for
    public use:
 
      |nukevimRun()|                                     |nukevimRun|
@@ -157,8 +157,8 @@ nukevim.txtFor    Vim version 7.4    Last change: 2016 July 4
 >
        :py nukevimRun()
 <
-     Some or all of the current buffer will be executed by Nuke. The 
-     content will be saved to a temporary file, and nuke.vim will send 
+     Some or all of the current buffer will be executed by Nuke. The
+     content will be saved to a temporary file, and nuke.vim will send
      commands to Nuke's socket server to source this file.
 
      In visual mode, only the selected lines will be executed, unless
@@ -174,11 +174,11 @@ nukevim.txtFor    Vim version 7.4    Last change: 2016 July 4
      The temporary files containing commands will be deleted when Vim
      is closed.  Do not delete any of them manually before you close
      Vim. The location of the temporary files depends on your system,
-     unless the option |g:nukevimTempDir| is set to override the 
-     default.  See the Python documentation on tempfile.mkstemp() for 
+     unless the option |g:nukevimTempDir| is set to override the
+     default.  See the Python documentation on tempfile.mkstemp() for
      details.
 
-     The function |nukevimSend()| is used to send all required 
+     The function |nukevimSend()| is used to send all required
      commands, please see there for details on the connection settings.
 
 =======================================================================
@@ -220,14 +220,14 @@ nukevim.txtFor    Vim version 7.4    Last change: 2016 July 4
 
    *:NukevimBuffer*
 
-     Calls the |nukevimRun()| function with the forceBuffer parameter 
+     Calls the |nukevimRun()| function with the forceBuffer parameter
      set to True. The command itself does not expect any parameters.
 
 =======================================================================
 
 9. Additional Information                                *nukevim-info*
 
-   See nuke.vim's page on github for more information, including links 
+   See nuke.vim's page on github for more information, including links
    to the bug tracker etc:
 
 >

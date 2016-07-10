@@ -15,7 +15,7 @@ class NukeVimRequestHandler(SocketServer.BaseRequestHandler):
         SocketServer.BaseRequestHandler.__init__(self, request, client_address, server)
 
     def handle(self):
-        tempfile_path = self.request.recv(4096)
+        tempfile_path = self.request.recv(2048)
 
         # Multiplex by app
         if self.server.app == "hiero":

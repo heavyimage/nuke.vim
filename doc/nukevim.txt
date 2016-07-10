@@ -128,7 +128,7 @@ nukevim.txtFor    Vim version 7.4    Last change: 2016 July 4
 
    Example setting in your |.vimrc| file:
 >
-     let g:nukevimPort=54321
+     let g:nukevimPort=10191
 <
    Note that every option is (re)evaluated whenever it is required, so
    changing an option during a session is supported.

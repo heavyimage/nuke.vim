@@ -20,7 +20,7 @@ nukevim.txtFor    Vim version 7.4    Last change: 2016 July 4
 
    nuke.vim is plugin for the Vim editor that may be used to execute
    the contents of a Vim buffer, or the current |visual-mode|
-   selection, in The Foundry's Nuke.
+   selection, in The Foundry's Nuke, Nuke Studio, or Hiero..
 
    The plugin saves the command(s) to be executed (only python is
    supported at this time but if TCL would be useful for anyone it's

@@ -34,7 +34,6 @@ endfunction
 call NukevimSetConfig( 'Host',             '127.0.0.1' )
 call NukevimSetConfig( 'Port',             10191       )
 call NukevimSetConfig( 'TempDir',          ''          )
-call NukevimSetConfig( 'Timeout',          5.0         )
 
 """
 " Mappings:

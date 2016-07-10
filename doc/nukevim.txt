@@ -126,15 +126,6 @@ nukevim.txtFor    Vim version 7.4    Last change: 2016 July 4
      system's default temporary path will be used, as determined by
      Python's tempfile library. See there for more details.
 
-   *g:nukevimTimeout*                                  *nukevimTimeout*
-
-     Default: 5.0
-
-     The timeout that will be used for the connection. If this is a
-     float value, it will be used as is, if it is set to an empty
-     string, timeout will be set to None. See the documentation of
-     Python's socket library for details on socket.settimeout().
-
    Example setting in your |.vimrc| file:
 >
      let g:nukevimPort=54321

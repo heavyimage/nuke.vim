@@ -1,7 +1,7 @@
 # nuke.vim
 An integration package for the Foundry's [Nuke](https://www.thefoundry.co.uk/products/nuke/).  This is my first vim plugin so go easy on me!
 
-![Screenshot of nuke.vim](https://github.com/heavyimage/nuke.vim/blob/master/docs/screenshot.png "Screenshot of nuke.vim")
+![Screenshot of nuke.vim](https://github.com/heavyimage/nuke.vim/blob/master/doc/screenshot.png "Screenshot of nuke.vim")
 # What works now
 * Syntax highlighting / a simple ftdetect plugin for .nk/.gizmo files!
 * Use vim as a replacement for the builtin nuke (Nuke Studio / Hiero) script editor(s)
@@ -19,7 +19,7 @@ An integration package for the Foundry's [Nuke](https://www.thefoundry.co.uk/pro
 
 # Installation
 
-* Copy plugin, doc, syntax, and ftdetect directories into your '~/.vim' directory.  If you use Pathogen and git (recommended!), instead git clone nuke.vim into your ~/.vim/bundles directory:
+* Copy plugin, doc, syntax, and ftdetect directories into your '~/.vim' directory.  If you use Pathogen and git (recommended!), instead clone nuke.vim into your ~/.vim/bundles directory:
 
 	```bash
 	    $ mkdir ~/.vim/bundles
@@ -27,7 +27,8 @@ An integration package for the Foundry's [Nuke](https://www.thefoundry.co.uk/pro
 	    $ git clone https://github.com/heavyimage/nuke.vim
 	```
 
-* Source the nukevim_server.py file distributed with nuke.vim (in the nuke/ directory) in your menu.py
+* Source the server code distributed with nuke.vim (see: nuke/nukevim_server.py) in your menu.py either
+
     * via a symlink (prefered, in case there are updates to nuke.vim's server component pushed to github)
 
         ```bash
@@ -44,15 +45,18 @@ An integration package for the Foundry's [Nuke](https://www.thefoundry.co.uk/pro
             $ cat "#start nukevim server\n\nimport nukevim_server\n\nnukevim_server.start()" >> ~/.nuke/menu.py
         ```
 
-    * The same code should work just fine for Nuke Studio -- for Hiero, you'll have to import the server in a slightly different way (consult the docs [Here](https://www.thefoundry.co.uk/products/hiero/developers/1.8/hieropythondevguide/setup.html "Maniuplating the hiero plugin path"))
+    * The same code should work just fine for Nuke Studio -- for Hiero, you'll have to import the server in a slightly different way (consult the docs [here](https://www.thefoundry.co.uk/products/hiero/developers/1.8/hieropythondevguide/setup.html "Maniupulating the hiero plugin path").)
 
-* Startup nuke and make sure there's a message in the terminal like 'nuke.vim server listening on $HOST:$PORT'
+* Startup nuke and make sure there's a message at startup that looks something like this:
+    ```bash
+        nuke.vim server: listening on 127.0.0.1:10191
+    ```
 
 # Now the fun part!
 
 Startup vim, and fill the buffer with a few python snippits
 
-    ```Python
+    ```python
         nuke.createNode("Blur")
 
         10+50
@@ -69,12 +73,10 @@ Then, consider the chart below:
 
 | Command | Pneuonic | Description |
 | --- | --- | --- |
-| <leader>sn | (s)end to (n)uke | Send the selection (or the current line if nothing is selected) to nuke |
-| <leader>sb | (s)end (b)uffer | Send the entire buffer to nuke |
+| \<leader\>sn | (s)end to (n)uke | Send the selection (or the current line if nothing is selected) to nuke |
+| \<leader\>sb | (s)end (b)uffer | Send the entire buffer to nuke |
 
-You should be iterating in no time!
-
-For more information, consult doc/nukevim.txt.
+You should be iterating in no time!  For more information, consult doc/nukevim.txt or me, via e-mail.
 
 # Enjoy!
 

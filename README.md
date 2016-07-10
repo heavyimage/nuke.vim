@@ -81,3 +81,9 @@ You should be iterating in no time!  For more information, consult doc/nukevim.t
 
 # Enjoy!
 
+# Thanks to:
+* Stefan Göbel's [vimya](http://www.vim.org/scripts/script.php?script_id=2626), a similar plugin for Autodesk Maya and the basis for this one.
+* Sylvain Delhomme's [VimNuke](https://bitbucket.org/sydh/vimnuke) plugin (itself an earlier clone of vimya)
+* Toke Jepsen's [atom-foundry-nuke](https://github.com/tokejepsen/atom-foundry-nuke) for Atom
+* [Ian Thompson](https://github.com/quornian) for providing a crucial bit of help
+

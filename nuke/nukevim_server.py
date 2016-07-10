@@ -22,12 +22,8 @@
 """ This module is for the code that runs inside of nuke / nukestudio / hiero
 and allows communciation with vim.
 
-Integration ideas inspired by Stefan Göbel's vimya and sydh's vimnuke
-
 Netcode inspired by https://pymotw.com/2/SocketServer/
 
-Special thanks to Ian Thompson for the snipit which allows execing into the
-script editor's context directly.
 """
 
 import sys

@@ -208,22 +208,19 @@ def nukevimSend(instructions_path):
     Returns any output recieved.
     """
 
-    timeout    =      vim.eval('g:nukevimTimeout')
     host       =      vim.eval('g:nukevimHost'   )
     port       =  int(vim.eval('g:nukevimPort'   ))
 
     try:
         connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        if timeout == '':
-            connection.settimeout(None)
-        else:
-            connection.settimeout(float(timeout))
+        connection.settimeout(None)
     except socket.error as e:
         __nukevimError('Could not initialize the socket: %s' % str(e))
         return 0
 
     try:
+        __nukevimMsg("Trying to connect to %s:%s" % (host, port))
         connection.connect((host, port))
     except socket.error as e:
         __nukevimError('Could not connect to command port: %s' % str(e))
@@ -234,9 +231,8 @@ def nukevimSend(instructions_path):
             __nukevimMsg("Sending %s" % instructions_path)
             connection.send(instructions_path)
 
-            data = connection.recv(4096)
-            # TODO: replacement of null terminators not working...
-            return data.replace('\0', '\n')
+            # limit reply to 16K
+            return connection.recv(16384)
 
         except socket.error as e:
             __nukevimError('Sending a command failed: %s' % str(e))
@@ -294,7 +290,9 @@ def nukevimRun(forceBuffer = False):
 
     response = nukevimSend(escaped_path)
     if response:
-        __nukevimMsg("Recieved from nuke: '%s'" % response)
+        # Print the results
+        for line in response.split("\n"):
+            __nukevimMsg(line)
         return True
     else:
         return False

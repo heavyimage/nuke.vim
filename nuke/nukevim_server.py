@@ -137,7 +137,7 @@ class NukeVimServer(SocketServer.TCPServer):
         self.stop_now = False
 
         # Switch on nuke.env to hook up the proper hiero function and cache here
-        if nuke.env['hiero']:
+        if nuke.env.has_key("hiero") and nuke.env['hiero']:
             self.app = "hiero"
         else:
             self.app = "nuke"

@@ -13,7 +13,7 @@ An integration package for the Foundry's [Nuke](https://www.thefoundry.co.uk/pro
 * Learn more about vim plugin development / scripting
 * Similar tools (see acknowledgement) failed to execute nuke code in the same context as the script editor meaning that you couldn't move back and forth between vim and the built in editor
 * Similar tools don't seem to send the output back to vim to make debugging and iteration even faster
-* It's a rediculous idea that no one but me will actually use
+* It's a ridiculous idea that no one but me will actually use
 
 # Requirements
 * A copy of vim compiled with python support (check vim --version; if you don't have support, try installing an enhanced or "huge" verison of vim with more flags enabled)

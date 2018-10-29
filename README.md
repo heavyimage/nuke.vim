@@ -3,9 +3,9 @@ An integration package for the Foundry's [Nuke](https://www.thefoundry.co.uk/pro
 
 # Included functionality
 * Syntax highlighting / a simple ftdetect plugin for .nk/.gizmo files!
-![Screenshot 1 of nuke.vim](https://github.com/heavyimage/nuke.vim/blob/master/doc/syntax.png "Screenshot of syntax hilighting")
+![Screenshot 1 of nuke.vim](https://raw.githubusercontent.com/heavyimage/nuke.vim/master/doc/syntax.png "Screenshot of syntax hilighting")
 * Use vim as a replacement for the builtin nuke (Nuke Studio / Hiero) script editor(s)
-![Screenshot 2 of nuke.vim](https://github.com/heavyimage/nuke.vim/blob/master/doc/scriptediting.png "Screenshot of using vim as a replacement for the script editor")
+![Screenshot 2 of nuke.vim](https://raw.githubusercontent.com/heavyimage/nuke.vim/master/doc/scriptediting.png "Screenshot of using vim as a replacement for the script editor")
 * See 'coming soon' (below) for more ideas I have for this package
 
 # Motivation

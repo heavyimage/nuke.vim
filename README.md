@@ -73,7 +73,7 @@ Startup vim, and fill the buffer with a few python snippits
 
 Then, consider the chart below:
 
-| Command | Pneuonic | Description |
+| Command | Mnemonic | Description |
 | --- | --- | --- |
 | \<leader\>sn | (s)end to (n)uke | Send the selection (or the current line if nothing is selected) to nuke |
 | \<leader\>sb | (s)end (b)uffer | Send the entire buffer to nuke |
